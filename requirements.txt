@@ -1,0 +1,8 @@
+# CORE DEPENDENCIES
+Django==5.2.3
+python-dotenv==1.1.0
+
+# DJANGO ESSENTIAL DEPENDENCIES
+asgiref==3.8.1
+sqlparse==0.5.3
+tzdata==2025.2
