@@ -7,12 +7,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomUser(AbstractUser):
-    # Tipi di utente
     class UserType(models.TextChoices):
         CUSTOMER = 'CU', _('Cliente')
         MANAGER = 'MA', _('Manager del Negozio')
 
-    # Campi aggiuntivi
     user_type = models.CharField(
         max_length=2,
         choices=UserType.choices,
@@ -21,7 +19,6 @@ class CustomUser(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
 
-    # Aggiungiamo related_name personalizzato per evitare conflitti
     groups = models.ManyToManyField(
         Group,
         verbose_name=_('groups'),
