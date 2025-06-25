@@ -42,20 +42,27 @@
                 <hr>
 
                 <!-- Form per Aggiungere al Carrello -->
-                <form method="post" action="#">
-                    {% csrf_token %}
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-4">
-                            <label for="quantity" class="form-label">Quantità:</label>
-                            <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="10">
+                {% if cart_item_ids and product.id in cart_item_ids %}
+                    <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary btn-lg w-100 mt-4">
+                        <i class="fas fa-shopping-cart me-2"></i>
+                    </a>
+                {% else %}
+                    <form method="post" action="{% url 'cart_add' product.id %}">
+                        {% csrf_token %}
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label">Quantity:</label>
+                                <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="10">
+                            </div>
+                            <div class="col-md-8">
+                                <button type="submit" class="btn btn-success btn-lg w-100 mt-md-4">
+                                    <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-md-8">
-                            <a href="{% url 'cart_add' product.id %}" class="btn btn-success btn-lg w-100 mt-md-4">
-                                <i class="fas fa-cart-plus me-2"></i>Aggiungi al Carrello
-                            </a>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                {% endif %}
+
 
                 <hr>
 

@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
-
+from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_POST
 
 from cart.models import Cart, CartItem
 from products.models import Product
@@ -20,15 +21,18 @@ def cart_detail(request):
     return render(request, 'cart/cart.html', context)
 
 
+@require_POST
+@csrf_protect
 def add_to_cart(request, product_id):
+    quantity = int(request.POST.get('quantity', 1))
     cart = _get_or_create_cart(request)
     product = Product.objects.get(id=product_id)  # Assuming Product model exists
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, unit_price=product.price)
 
     if not created:
-        cart_item.quantity += 1
+        cart_item.quantity += quantity
     else:
-        cart_item.quantity = 1
+        cart_item.quantity = quantity
 
     # cart_item.unit_price = product.price
     cart_item.save()
@@ -63,8 +67,13 @@ def remove_from_cart(request, item_id):
     cart_item.delete()
 
     cart = _get_or_create_cart(request)
+    if cart.items.count() == 0:
+        return JsonResponse({
+            'empty': True,
+        })
 
     return JsonResponse({
+        'cart_items_count': cart.items.count(),
         'total': cart.total,
         'tax': cart.tax,
         'grand_total': cart.grand_total,
@@ -72,9 +81,9 @@ def remove_from_cart(request, item_id):
 
 
 def _get_or_create_cart(request):
+    if not request.session.session_key:
+        request.session.create()  # Ensure the session key is created
     session_key = request.session.session_key
-    if not session_key:
-        session_key = request.session.create()
     cart, created = Cart.objects.get_or_create(cart_id=session_key)
     return cart
 

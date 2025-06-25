@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const itemId = this.getAttribute('data-item-id');
             const action = this.getAttribute('data-action');
             const quantityInput = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
-            let newQuantity = parseInt(quantityInput.value);
+            const quantity = parseInt(quantityInput.value);
+            let newQuantity = quantity;
 
             if (action === 'increase') {
                 newQuantity++;
@@ -17,6 +18,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Update the quantity input field
             quantityInput.value = newQuantity;
+
+            if (newQuantity === 1 ) {
+                this.classList.add('disabled');
+            } else if(quantity === 1 && newQuantity > 1 && action === 'increase') {
+                document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="decrease"]`).classList.remove('disabled');
+
+            }
 
             // Send AJAX request to update the quantity on the server
             fetch(`/cart/update/${itemId}/`, {
@@ -28,8 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify({ quantity: newQuantity })
             })
                 .then(response => response.json())
-                .then(data => {
-                    // Update the subtotal and total dynamically
+                .then(data => {// Update the subtotal and total dynamically
                     document.querySelector(`#subtotal-${itemId}`).textContent = `€${data.subtotal}`;
                     document.querySelector('#cart-total').textContent = `€${data.total}`;
                     document.querySelector('#cart-tax').textContent = `€${data.tax}`;
@@ -53,10 +60,15 @@ document.addEventListener('DOMContentLoaded', function () {
             })
                 .then(response => response.json())
                 .then(data => {
+                    if (data.empty) {
+                        window.location.assign('/cart/');
+                        return;
+                    }
                     // Remove the item row from the table
                     document.querySelector(`#cart-item-row-${itemId}`).remove();
 
                     // Update the total dynamically
+                    document.querySelector('#cart_icon_number').textContent = `${data.cart_items_count}`;
                     document.querySelector('#cart-total').textContent = `€${data.total}`;
                     document.querySelector('#cart-tax').textContent = `€${data.tax}`;
                     document.querySelector('#cart-gran-total').textContent = `€${data.grand_total}`;
