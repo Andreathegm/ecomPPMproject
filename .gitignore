@@ -19,3 +19,5 @@ Thumbs.db
 requirements_all.txt
 *.log
 db.sqlite3
+# Ignore media files
+media/

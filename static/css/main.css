@@ -1,0 +1,61 @@
+/* static/css/custom_styles.css */
+
+/* Styling for the scrollable container */
+.category-scroll-container {
+    overflow-x: auto; /* Enable horizontal scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scroll-behavior: smooth; /* Smooth scroll effect for JS */
+    padding-bottom: 15px; /* Add some padding for scrollbar if visible */
+    gap: 20px; /* Space between items using gap property */
+}
+
+/* Hide scrollbar for a cleaner look, but keep scroll functionality */
+.category-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+.category-scroll-container {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Styling for individual category items */
+.category-item {
+    min-width: 300px; /* Set a consistent width for each card */
+    flex: 0 0 auto; /* Prevent items from shrinking/growing */
+}
+
+/* Ensure images have consistent dimensions */
+.category-img {
+    width: 100%; /* Make image fill its container */
+    height: 200px; /* Set a fixed height for all images */
+    object-fit: cover; /* Crop images to fit, maintaining aspect ratio */
+}
+
+/* Arrow button positioning (adjusted to be more dynamic) */
+.category-section-wrapper {
+    position: relative; /* Ensure arrows are positioned relative to this wrapper */
+}
+
+.category-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.left-arrow {
+    left: 0; /* Position left arrow at the start of the wrapper */
+    margin-left: -30px; /* Adjust as needed to pull it outside the main content flow */
+}
+
+.right-arrow {
+    right: 0; /* Position right arrow at the end of the wrapper */
+    margin-right: -30px; /* Adjust as needed */
+}
+
+/* Adjust arrow visibility for smaller screens if needed */
+@media (max-width: 767px) {
+    .category-arrow {
+        display: none !important; /* Hide arrows on small screens */
+    }
+}

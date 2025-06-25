@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Your cart - ShopFront{% endblock title %}
+
+{% block content %}
+    <div class="container my-5">
+        <h1 class="mb-4">Your Shopping Cart</h1>
+
+        {% if cart_items %}
+            <div class="row">
+                <!-- Colonna Sinistra: Articoli nel Carrello -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 50%;">Prodotto</th>
+                                        <th scope="col" class="text-center">Prezzo</th>
+                                        <th scope="col" class="text-center">Quantità</th>
+                                        <th scope="col" class="text-end">Subtotale</th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {# Inizia il loop degli articoli nel carrello #}
+                                    {% for item in cart_items%}
+                                        <tr id="cart-item-row-{{ item.id }}">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <a href="#">
+                                                        <img src="{{ item.product.image.url|default:'https://placehold.co/100x100/eee/333?text=IMG' }}" class="img-fluid rounded" style="width: 100px;" alt="{{ item.product.name }}">
+                                                    </a>
+                                                    <div class="ms-3">
+                                                        <h6 class="mb-0"><a href="#" class="text-dark">{{ item.product.name|default:"Nome Prodotto" }}</a></h6>
+                                                        <small class="text-muted">{{ item.product.category.name|default:"Categoria" }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">€{{ item.unit_price|default:"25.50" }}</td>
+                                            <td>
+                                                <!-- Form per aggiornare la quantità -->
+                                                <div class="d-flex justify-content-center">
+                                                    <button class="btn btn-outline-secondary btn-sm ms-2 update-quantity"
+                                                            data-item-id="{{ item.id }}"
+                                                            data-action="decrease"
+                                                            title="Decrease quantity">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="number" class="form-control form-control-sm text-center quantity-input"
+                                                           value="{{ item.quantity }}"
+                                                           min="1" max="99"
+                                                           data-item-id="{{ item.id }}"
+                                                           readonly
+                                                           style="width: 70px;">
+                                                    <button class="btn btn-outline-secondary btn-sm ms-2 update-quantity"
+                                                            data-item-id="{{ item.id }}"
+                                                            data-action="increase"
+                                                            title="Increase quantity">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td id="subtotal-{{ item.id }}" class="text-end fw-bold">€{{ item.subtotal|default:"25.50" }}</td>
+                                            <td class="text-end">
+                                                <!-- Form per rimuovere l'articolo -->
+                                                    {% csrf_token %}
+                                                    <button   type="submit" class="btn btn-outline-danger btn-sm" data-item-id="{{ item.id }}" title="Rimuovi articolo">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    {# Fine del loop #}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="{% url 'main' %}" class="btn btn-outline-dark"><i class="fas fa-arrow-left me-2"></i>Continua lo Shopping</a>
+                </div>
+
+                <!-- Colonna Destra: Riepilogo Ordine -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm sticky-top" style="top: 20px;">
+                        <div class="card-header">
+                            <h5 class="mb-0">Riepilogo Ordine</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Subtotale
+                                    <span id="cart-total">€{{ cart.total|default:"25.50" }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Spedizione
+                                    <span id="cart-tax">{{ cart.tax }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                    <div>
+                                        <strong>Totale</strong>
+                                        <p class="mb-0"><small>(IVA inclusa)</small></p>
+                                    </div>
+                                    <strong id="cart-gran-total" class="fs-5">€{{ cart.grand_total|default:"30.50" }}</strong>
+                                </li>
+                            </ul>
+
+                            <a href="#" class="btn btn-primary btn-lg w-100">
+                                Procedi al Checkout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Sezione Carrello Vuoto -->
+            <div class="row">
+                <div class="col-12 text-center">
+                    <div class="card-body p-5">
+                        <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+                        <h3 class="mb-3">Your Shopping Cart is empty</h3>
+                        <p class="text-muted mb-4">Seems like you haven't added any product</p>
+                        <a href="{% url 'main' %}" class="btn btn-primary btn-lg">Start shopping</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}
+
+{% block footer_js %}
+    <script src="{% static 'js/cart/cartmanager.js' %}"></script>
+{% endblock footer_js %}
