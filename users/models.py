@@ -8,8 +8,8 @@ from django.utils.translation import gettext_lazy as _
 
 class CustomUser(AbstractUser):
     class UserType(models.TextChoices):
-        CUSTOMER = 'CU', _('Cliente')
-        MANAGER = 'MA', _('Manager del Negozio')
+        CUSTOMER = 'CU', _('Client')
+        MANAGER = 'MA', _('Manager')
 
     user_type = models.CharField(
         max_length=2,

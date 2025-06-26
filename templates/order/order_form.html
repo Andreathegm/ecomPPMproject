@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout - ShopEasy{% endblock title %}
+
+{% block content %}
+    <div class="container my-5">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h1>Checkout</h1>
+                <p class="lead">Completa i dettagli qui sotto per finalizzare il tuo ordine.</p>
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <!-- Colonna Destra: Riepilogo Ordine (opzionale ma consigliato) -->
+            <div class="col-md-5 col-lg-4 order-md-last">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Il tuo carrello</span>
+                    <span class="badge bg-primary rounded-pill">{{ cart.items.count|default:3 }}</span>
+                </h4>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Subtotale</span>
+                        <strong>€{{ cart.total|default:"150.00" }}</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Spedizione</span>
+                        <strong>€5.00</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between bg-light">
+                        <div class="text-success">
+                            <h6 class="my-0">Codice Sconto</h6>
+                            <small>EXAMPLECODE</small>
+                        </div>
+                        <span class="text-success">−€10.00</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Totale (IVA Inclusa)</span>
+                        <strong>€{{ cart.grand_total|default:"145.00" }}</strong>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Colonna Sinistra: Modulo di Checkout -->
+            <div class="col-md-7 col-lg-8">
+                <h4 class="mb-3">Indirizzo di Spedizione</h4>
+
+                {# NOTA: Per applicare automaticamente le classi Bootstrap come 'form-control',
+                puoi usare un pacchetto come 'django-crispy-forms' o personalizzare
+                il widget del form nel file forms.py aggiungendo l'attributo 'class'. #}
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    {# Mostra errori non legati a campi specifici (es. problemi di pagamento) #}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            {{ form.shipping_name.label_tag }}
+                            {{ form.shipping_name }}
+                            <div class="invalid-feedback d-block">{{ form.shipping_name.errors }}</div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form.shipping_email.label_tag }}
+                            {{ form.shipping_email }}
+                            <div class="invalid-feedback d-block">{{ form.shipping_email.errors }}</div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form.shipping_phone.label_tag }}
+                            {{ form.shipping_phone }}
+                            <div class="invalid-feedback d-block">{{ form.shipping_phone.errors }}</div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form.shipping_address.label_tag }}
+                            {{ form.shipping_address }}
+                            <div class="invalid-feedback d-block">{{ form.shipping_address.errors }}</div>
+                        </div>
+
+                        <div class="col-md-5">
+                            {{ form.shipping_city.label_tag }}
+                            {{ form.shipping_city }}
+                            <div class="invalid-feedback d-block">{{ form.shipping_city.errors }}</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            {{ form.shipping_country.label_tag }}
+                            {{ form.shipping_country }}
+                            <div class="invalid-feedback d-block">{{ form.shipping_country.errors }}</div>
+                        </div>
+
+                        <div class="col-md-3">
+                            {{ form.shipping_postal_code.label_tag }}
+                            {{ form.shipping_postal_code }}
+                            <div class="invalid-feedback d-block">{{ form.shipping_postal_code.errors }}</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h4 class="mb-3">Pagamento</h4>
+
+                    <div class="mb-3">
+                        {{ form.payment_method.label_tag }}
+                        {{ form.payment_method }}
+                        <div class="invalid-feedback d-block">{{ form.payment_method.errors }}</div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button class="w-100 btn btn-primary btn-lg" type="submit">Conferma Ordine</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

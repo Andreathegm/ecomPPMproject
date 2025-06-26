@@ -8,63 +8,60 @@ from .models import Order, OrderItem
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    readonly_fields = ('get_total_price',)
-    fields = ('product', 'quantity', 'price', 'get_total_price')
+    readonly_fields = ('total_price_display',)
+    fields = ('product', 'quantity', 'price', 'total_price_display')
 
-    def get_total_price(self, obj):
+    def total_price_display(self, obj):
         if obj.pk:
-            return f"€{obj.get_total_price():.2f}"
+            return f"€{obj.total_price:.2f}"
         return "€0.00"
-    get_total_price.short_description = 'Total Price'
+    total_price_display.short_description = 'Total Price'
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
-        'order_number',
+        'id',
         'user',
         'status',
         'total_amount',
-        'get_total_items',
+        'total_items',
         'is_paid',
         'created_at'
     ]
-
     list_filter = [
         'status',
         'is_paid',
         'created_at',
         'shipping_country'
     ]
-
     search_fields = [
-        'order_number',
+        'id',
         'user__username',
         'user__email',
         'shipping_email',
         'shipping_name'
     ]
-
     readonly_fields = [
-        'order_number',
+        'id',
         'created_at',
         'updated_at',
         'subtotal',
         'tax_amount',
+        'shipping_cost',
         'total_amount',
-        'get_total_items',
-        'get_order_summary'
+        'total_items',
+        'order_summary'
     ]
-
     fieldsets = (
         ('Order Information', {
             'fields': (
-                'order_number',
+                'id',
                 'user',
                 'status',
                 'created_at',
                 'updated_at',
-                'get_order_summary'
+                'order_summary'
             )
         }),
         ('Shipping Information', {
@@ -87,41 +84,39 @@ class OrderAdmin(admin.ModelAdmin):
                 'tax_amount',
                 'total_amount'
             )
-        })
+        }),
     )
-
     inlines = [OrderItemInline]
-
     actions = ['mark_as_processing', 'mark_as_shipped', 'mark_as_delivered']
 
-    def get_total_items(self, obj):
-        return obj.get_total_items()
-    get_total_items.short_description = 'Total Items'
+    def total_items(self, obj):
+        return obj.total_items
+    total_items.short_description = 'Total Items'
 
-    def get_order_summary(self, obj):
-        if obj.pk:
-            items = obj.order_items.all()
-            if items:
-                summary = "<strong>Items in this order:</strong><br>"
-                for item in items:
-                    summary += f"• {item.quantity}x {item.product.name} - €{item.get_total_price():.2f}<br>"
-                return mark_safe(summary)
-        return "No items"
-    get_order_summary.short_description = 'Order Summary'
+    def order_summary(self, obj):
+        items = obj.order_items.all()
+        if not items:
+            return "No items"
+        html = ["<strong>Items in this order:</strong><ul style='margin:0; padding-left:1rem;'>"]
+        for item in items:
+            html.append(f"<li>{item.quantity}× {item.product.name} — €{item.total_price:.2f}</li>")
+        html.append("</ul>")
+        return mark_safe(''.join(html))
+    order_summary.short_description = 'Order Summary'
 
     def mark_as_processing(self, request, queryset):
         updated = queryset.update(status='processing')
-        self.message_user(request, f'{updated} orders marked as processing.')
+        self.message_user(request, f'{updated} order(s) marked as processing.')
     mark_as_processing.short_description = 'Mark selected orders as processing'
 
     def mark_as_shipped(self, request, queryset):
         updated = queryset.update(status='shipped')
-        self.message_user(request, f'{updated} orders marked as shipped.')
+        self.message_user(request, f'{updated} order(s) marked as shipped.')
     mark_as_shipped.short_description = 'Mark selected orders as shipped'
 
     def mark_as_delivered(self, request, queryset):
         updated = queryset.update(status='delivered')
-        self.message_user(request, f'{updated} orders marked as delivered.')
+        self.message_user(request, f'{updated} order(s) marked as delivered.')
     mark_as_delivered.short_description = 'Mark selected orders as delivered'
 
 
@@ -132,44 +127,40 @@ class OrderItemAdmin(admin.ModelAdmin):
         'product',
         'quantity',
         'price',
-        'get_total_price',
+        'total_price_display',
         'created_at'
     ]
-
     list_filter = [
         'created_at',
-        'product__category',  # Assuming your Product model has a category field
+        'product__category',
         'order__status'
     ]
-
     search_fields = [
-        'order__order_number',
+        'order__id',
         'product__name',
         'order__user__username'
     ]
+    readonly_fields = [
+        'total_price_display',
+        'created_at',
+        'order_link'
+    ]
 
-    readonly_fields = ['get_total_price', 'created_at', 'order_link']
-
-    # Disable add/delete permissions - OrderItems should only be created through checkout
     def has_add_permission(self, request):
+        # Gli OrderItem si creano solo via checkout, non da Admin
         return False
 
     def has_delete_permission(self, request, obj=None):
-        # Allow delete only if order is still pending
-        if obj and obj.order.status == 'pending':
-            return True
-        return False
+        # Permetti delete solo se l'ordine è ancora pending
+        return bool(obj and obj.order.status == 'pending')
 
-    def get_total_price(self, obj):
-        # Add safety check to prevent errors
-        if obj and obj.quantity and obj.price:
-            return f"€{obj.get_total_price():.2f}"
-        return "€0.00"
-    get_total_price.short_description = 'Total Price'
+    def total_price_display(self, obj):
+        return f"€{obj.total_price:.2f}" if obj else "€0.00"
+    total_price_display.short_description = 'Total Price'
 
     def order_link(self, obj):
-        if obj and obj.order:
-            url = reverse('admin:orders_order_change', args=[obj.order.pk])
-            return format_html('<a href="{}">{}</a>', url, obj.order.order_number)
+        if obj and obj.order_id:
+            url = reverse('admin:orders_order_change', args=[obj.order_id])
+            return format_html('<a href="{}">Order {}</a>', url, obj.order_id)
         return "No Order"
     order_link.short_description = 'Order'
