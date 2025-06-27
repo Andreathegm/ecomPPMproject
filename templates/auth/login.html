@@ -9,48 +9,52 @@
             <div class="col-md-8 col-lg-6 col-xl-5">
                 <div class="card shadow-sm">
                     <div class="card-body p-4 p-md-5">
-                        <h2 class="text-center mb-4 fw-bold">Accedi al tuo Account</h2>
+                        <h2 class="text-center mb-4 fw-bold">Login to your account</h2>
 
-                        {# Questo form è un esempio. Dovrai integrarlo con il form di login di Django. #}
-                        <form method="post" action="#"> {# Sostituisci '#' con l'URL di login, es: {% url 'login' %} #}
+                        <form method="post" action="{% url 'login' %}">
                             {% csrf_token %}
 
-                            {# Esempio di come mostrare errori generali del form #}
                             {% if form.non_field_errors %}
                                 <div class="alert alert-danger" role="alert">
                                     {% for error in form.non_field_errors %}
-                                        {{ error }}
+                                        {{ error }}<br>
                                     {% endfor %}
                                 </div>
                             {% endif %}
 
-                            <!-- Campo Username -->
                             <div class="mb-3">
-                                <label for="id_username" class="form-label">Username</label>
-                                <input type="text" name="username" class="form-control" id="id_username" required>
+                                <label for="{{ form.username.id_for_label }}" class="form-label">
+                                    {{ form.username.label }}
+                                </label>
+                                {{ form.username }}
+                                {% for err in form.username.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
                             </div>
 
-                            <!-- Campo Password -->
                             <div class="mb-4">
-                                <label for="id_password" class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" id="id_password" required>
+                                <label for="{{ form.password.id_for_label }}" class="form-label">
+                                    {{ form.password.label }}
+                                </label>
+                                {{ form.password }}
+                                {% for err in form.password.errors %}
+                                    <div class="text-danger small mt-1">{{ err }}</div>
+                                {% endfor %}
                             </div>
 
-                            <!-- Link Password Dimenticata -->
                             <div class="d-flex justify-content-end mb-4">
-                                <a href="#">Hai dimenticato la password?</a>
+                                <a href="{#% url 'password_reset' %#}">Have you forgotten your password?</a>
                             </div>
 
-                            <!-- Pulsante di Login -->
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary btn-lg">Accedi</button>
+                                <button type="submit" class="btn btn-primary btn-lg">Login</button>
                             </div>
-
                         </form>
                     </div>
+
                     <div class="card-footer text-center py-3">
                         <div class="small">
-                            Non hai ancora un account? <a href="#">Registrati ora</a>
+                            Don't have an account? <a href="{% url 'signup' %}">Sign-up</a>
                         </div>
                     </div>
                 </div>
