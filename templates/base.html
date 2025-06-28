@@ -85,7 +85,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                             <li><a class="dropdown-item" href="#">My Account</a></li>
-                            <li><a class="dropdown-item" href="#">Order History</a></li>
+                            <li><a class="dropdown-item" href="{% url 'order_history' %}">Order History</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 {% if user.is_authenticated %}

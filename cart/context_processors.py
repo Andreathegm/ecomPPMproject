@@ -1,8 +1,8 @@
-from products.views import get_cart  # Usa la tua funzione esistente
+from cart.utils import get_existing_cart
 
 
 def cart_context(request):
-    cart = get_cart(request)
+    cart = get_existing_cart(request)
 
     if cart:
         cart_item_ids = set(cart.items.values_list('product_id', flat=True))

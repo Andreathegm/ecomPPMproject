@@ -5,7 +5,6 @@ from .models import Order
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        # Campi che il cliente compila durante il checkout
         fields = [
             'shipping_name',
             'shipping_email',
@@ -17,20 +16,19 @@ class OrderForm(forms.ModelForm):
             'payment_method',
         ]
         widgets = {
-            'shipping_address': forms.Textarea(attrs={'rows': 3}),
-            'payment_method': forms.Select(choices=[
-                ('credit_card',   'Carta di credito'),
-                ('paypal',        'PayPal'),
-                ('bank_transfer', 'Bonifico bancario'),
-            ]),
-        }
-        labels = {
-            'shipping_name':         'Nome destinatario',
-            'shipping_email':        'Email destinatario',
-            'shipping_phone':        'Telefono',
-            'shipping_address':      'Indirizzo di spedizione',
-            'shipping_city':         'Città',
-            'shipping_postal_code':  'CAP',
-            'shipping_country':      'Nazione',
-            'payment_method':        'Metodo di pagamento',
+            'shipping_name':        forms.TextInput(attrs={'class': 'form-control'}),
+            'shipping_email':       forms.EmailInput(attrs={'class': 'form-control'}),
+            'shipping_phone':       forms.TextInput(attrs={'class': 'form-control'}),
+            'shipping_address':     forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'shipping_city':        forms.TextInput(attrs={'class': 'form-control'}),
+            'shipping_postal_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'shipping_country':     forms.TextInput(attrs={'class': 'form-control'}),
+            'payment_method': forms.Select(
+                attrs={'class': 'form-select'},
+                choices=[
+                    ('credit_card', 'Credit card'),
+                    ('paypal', 'PayPal'),
+                    ('bank_transfer', 'Bank transfer'),
+                ]
+            ),
         }

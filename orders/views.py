@@ -1,60 +1,69 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
-from django.views.generic import CreateView, UpdateView, ListView, DetailView
+from django.views.generic import CreateView
+from cart.utils import get_or_create_cart
+from cart.models import CartItem
 from .form import OrderForm
-from .models import Order
+from .models import Order, OrderItem
+from decimal import Decimal
 
 
-class OrderCreateView(LoginRequiredMixin,
-                      PermissionRequiredMixin,
-                      CreateView):
+class OrderCreateView(LoginRequiredMixin, CreateView):
     model = Order
     form_class = OrderForm
-    template_name = 'orders/order_form.html'
-    permission_required = 'orders.add_order'
+    template_name = 'order/order_form.html'
+    success_url = reverse_lazy('order_history')
 
-    def get_success_url(self):
-        return reverse_lazy('order_list')
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        cart = get_or_create_cart(self.request)
+        ctx['cart'] = cart
+        return ctx
 
     def form_valid(self, form):
-        form.instance.user = self.request.user
+        cart = get_or_create_cart(self.request)
+        items = cart.items.select_related('product')
+        if not items.exists():
+            form.add_error(None, "your cart is empty.")
+            return self.form_invalid(form)
+
+        # Salva l'ordine base (shipping + user)
+        order = form.save(commit=False)
+        order.user = self.request.user
+        # Copia i totali dal carrello
+        order.subtotal      = cart.total
+        order.tax_amount    = cart.tax
+        # se hai shipping cost fisso: order.shipping_cost = cart.tax*0 ecc.
+        order.shipping_cost = Decimal('5.00')  # o un calcolo dinamico
+        order.total_amount  = cart.grand_total
+        order.save()
+
+        # Crea le righe ordine
+        for ci in items:
+            OrderItem.objects.create(
+                order=order,
+                product=ci.product,
+                quantity=ci.quantity,
+                price=ci.unit_price
+            )
+
+        # Svuota il carrello
+        items.delete()
+        cart.status = cart.Status.COMPLETED
+        cart.save()
+
         return super().form_valid(form)
 
 
-class OrderUpdateView(LoginRequiredMixin,
-                      PermissionRequiredMixin,
-                      UpdateView):
-    model = Order
-    form_class = OrderForm
-    template_name = 'orders/order_form.html'
-    permission_required = 'orders.change_order'
-    success_url = reverse_lazy('order_list')
+@login_required
+def order_confirm_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    return render(request, 'order/confirmation.html', {'order': order})
 
 
-class OrderListView(LoginRequiredMixin,
-                    ListView):
-    model = Order
-    template_name = 'orders/order_list.html'
-    context_object_name = 'orders'
-    paginate_by = 10
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        if self.request.user.has_perm('orders.view_order'):
-            return qs.order_by('-created_at')
-        return qs.filter(user=self.request.user).order_by('-created_at')
-
-
-class OrderDetailView(LoginRequiredMixin,
-                      DetailView):
-    model = Order
-    template_name = 'orders/order_detail.html'
-    context_object_name = 'order'
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        if self.request.user.has_perm('orders.view_order'):
-            return qs
-        return qs.filter(user=self.request.user)
-
-
+@login_required
+def order_history_view(request):
+    orders = Order.objects.filter(user=request.user).prefetch_related('order_items__product').order_by('-created_at')
+    return render(request, 'order/order_history.html', {'orders': orders})

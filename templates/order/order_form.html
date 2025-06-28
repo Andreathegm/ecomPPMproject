@@ -25,16 +25,20 @@
                         <strong>€{{ cart.total|default:"150.00" }}</strong>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Spedizione</span>
-                        <strong>€5.00</strong>
+                        <span>tax</span>
+                        <strong>{{ cart.tax }}€</strong>
                     </li>
-                    <li class="list-group-item d-flex justify-content-between bg-light">
-                        <div class="text-success">
-                            <h6 class="my-0">Codice Sconto</h6>
-                            <small>EXAMPLECODE</small>
-                        </div>
-                        <span class="text-success">−€10.00</span>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Shipping cost</span>
+                        <strong>-</strong>
                     </li>
+{#                    <li class="list-group-item d-flex justify-content-between bg-light">#}
+{#                        <div class="text-success">#}
+{#                            <h6 class="my-0">Codice Sconto</h6>#}
+{#                            <small>EXAMPLECODE</small>#}
+{#                        </div>#}
+{#                        <span class="text-success">−€10.00</span>#}
+{#                    </li>#}
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Totale (IVA Inclusa)</span>
                         <strong>€{{ cart.grand_total|default:"145.00" }}</strong>
@@ -46,9 +50,6 @@
             <div class="col-md-7 col-lg-8">
                 <h4 class="mb-3">Indirizzo di Spedizione</h4>
 
-                {# NOTA: Per applicare automaticamente le classi Bootstrap come 'form-control',
-                puoi usare un pacchetto come 'django-crispy-forms' o personalizzare
-                il widget del form nel file forms.py aggiungendo l'attributo 'class'. #}
                 <form method="post" class="needs-validation" novalidate>
                     {% csrf_token %}
 
@@ -105,7 +106,7 @@
 
                     <hr class="my-4">
 
-                    <h4 class="mb-3">Pagamento</h4>
+                    <h4 class="mb-3">Payment</h4>
 
                     <div class="mb-3">
                         {{ form.payment_method.label_tag }}

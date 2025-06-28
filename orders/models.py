@@ -52,7 +52,7 @@ class Order(models.Model):
         return sum(item.quantity for item in self.order_items.all())
 
     def calculate_totals(self):
-        subtotal = sum(item.get_total_price() for item in self.order_items.all())
+        subtotal = sum(item.total_price for item in self.order_items.all())
         tax      = subtotal * Decimal('0.22')
         shipping = Decimal('5.99') if subtotal < Decimal('50.00') else Decimal('0.00')
         total    = subtotal + tax + shipping

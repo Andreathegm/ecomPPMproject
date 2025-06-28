@@ -27,6 +27,8 @@ urlpatterns = [
     path("", include("cart.urls")),
     path("", include("products.urls")),
 
+    path("", include("orders.urls")),
+
 ]
 if settings.DEBUG:
     import debug_toolbar

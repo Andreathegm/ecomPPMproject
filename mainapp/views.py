@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.core.paginator import Paginator
 from products.models import Category  # Assumendo che il model Category sia in products.models
 
 

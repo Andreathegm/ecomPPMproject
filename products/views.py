@@ -4,7 +4,6 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 
 from cart.models import Cart
-from cart.views import _get_or_create_cart
 from products.models import Category, Product
 
 
@@ -27,13 +26,6 @@ def product_detail(request, product_slug):
         'product': product,
     }
     return render(request, 'products/product_detail.html', context)
-
-
-def get_cart(request):
-    try:
-        return Cart.objects.get(cart_id=request.session.session_key)
-    except Cart.DoesNotExist:
-        return None
 
 
 class ProductListView(ListView):

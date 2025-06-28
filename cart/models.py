@@ -43,14 +43,17 @@ class Cart(TimestampedModel):
         COMPLETED = 'completed', 'Completato'
         CANCELLED = 'cancelled', 'Annullato'
 
-    cart_id: models.AutoField = models.CharField(max_length=250, blank=True)
-    #
-    # user: models.ForeignKey = models.ForeignKey(
-    #     settings.AUTH_USER_MODEL,
-    #     on_delete=models.CASCADE,
-    #     related_name='carts',
-    #     help_text="Utente proprietario del carrello"
-    # )
+    cart_id = models.CharField(max_length=250, blank=True)
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='carts',
+        null=True,
+        blank=True,
+        help_text="User associated with the cart"
+    )
+
     status: models.CharField = models.CharField(
         max_length=10,
         choices=Status.choices,
