@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+<link rel="stylesheet" href="{% static 'css/product/addproduct.css' %}">
+
+
+{% block content %}
+    <div class="container py-4">
+        <h1 class="mb-4">➕ Aggiungi Nuovo Prodotto</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-box"></i> Dati Prodotto
+                </div>
+                <div class="card-body">
+                    {% crispy form %}
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-images"></i> Immagini Prodotto
+                </div>
+                <div class="card-body">
+                    {{ formset.management_form }}
+
+                    <!-- Immagine Principale -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-star"></i> Immagine Principale
+                        </h5>
+                        <div id="main-image-container" class="main-image-upload">
+                            <!-- Sarà popolato dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Immagini Secondarie -->
+                    <div id="secondary-images-section" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="text-secondary mb-0">
+                                <i class="fas fa-images"></i> Immagini Secondarie
+                            </h5>
+                            <span class="badge bg-info" id="image-counter">0/9</span>
+                        </div>
+
+                        <div class="row gx-3 gy-3" id="secondary-images-container">
+                            <!-- Immagini secondarie aggiunte dinamicamente -->
+                        </div>
+
+                        <button type="button" class="btn btn-outline-primary mt-3" id="add-image-btn">
+                            <i class="fas fa-plus"></i> Aggiungi Immagine
+                        </button>
+                    </div>
+
+                    <!-- Forms nascosti per il formset -->
+                    <div id="hidden-forms" style="display: none;">
+                        {% for img_form in formset %}
+                            <div class="formset-form" data-form-index="{{ forloop.counter0 }}">
+                                {% for field in img_form %}
+                                    {{ field }}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Salva Prodotto
+                </button>
+                <a href="#" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-times"></i> Annulla
+                </a>
+            </div>
+        </form>
+    </div>
+    {% block footer_js %}
+
+    {% endblock footer_js %}
+{% endblock %}

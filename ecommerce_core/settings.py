@@ -40,12 +40,17 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party apps
     "debug_toolbar",
+    'crispy_forms',
+    'crispy_bootstrap5',
     # Local apps
     "products",
     "orders",
     "cart",
-    "users",
+    "users.apps.UsersConfig",
+
 ]
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTH_USER_MODEL = 'users.CustomUser'
 LOGOUT_REDIRECT_URL = '/'

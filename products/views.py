@@ -1,9 +1,12 @@
+from django.contrib.auth.decorators import permission_required
 from django.core.paginator import Paginator
 from django.http import Http404
-from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
 
 from cart.models import Cart
+from products.forms import ProductForm, ProductImageFormSet
 from products.models import Category, Product
 
 
@@ -77,3 +80,45 @@ class ProductListView(ListView):
         ctx['selected_order'] = self.request.GET.get('order', '')
 
         return ctx
+
+
+@permission_required('products.add_product', raise_exception=True)
+def add_product(request):
+    if request.method == 'POST':
+        form    = ProductForm(request.POST)
+        formset = ProductImageFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            product = form.save()
+            formset.instance = product
+            formset.save()
+            messages.success(request, "Prodotto creato con successo!")
+            return redirect('main')
+    else:
+        form    = ProductForm()
+        formset = ProductImageFormSet()
+
+    return render(request, 'store_manager/add_product.html', {
+        'form': form,
+        'formset': formset
+    })
+
+
+def create_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST)
+        formset = ProductImageFormSet(request.POST, request.FILES)
+
+        print("Form valid:", form.is_valid())
+        print("Formset valid:", formset.is_valid())
+
+        if form.errors:
+            print("Form errors:", form.errors)
+        if formset.errors:
+            print("Formset errors:", formset.errors)
+
+        if form.is_valid() and formset.is_valid():
+            product = form.save()
+            formset.instance = product
+            formset.save()
+            return redirect('success_url')
+    # ... resto del codice

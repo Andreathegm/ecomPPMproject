@@ -1,0 +1,122 @@
+.image-upload-card {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #f8f9fa;
+}
+
+.image-upload-card:hover {
+    border-color: #0d6efd;
+    background: #e7f1ff;
+}
+
+.image-upload-card.has-image {
+    border-style: solid;
+    border-color: #198754;
+    background: #fff;
+    cursor: default;
+}
+
+.image-preview {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.preview-img {
+    max-height: 200px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.main-image-upload .preview-img {
+    max-height: 300px;
+}
+
+.image-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.action-btn {
+    background: rgba(0,0,0,0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-btn:hover {
+    background: rgba(0,0,0,0.9);
+}
+
+.action-btn.delete {
+    background: rgba(220, 53, 69, 0.8);
+}
+
+.action-btn.delete:hover {
+    background: rgba(220, 53, 69, 1);
+}
+
+.upload-placeholder {
+    color: #6c757d;
+    padding: 40px 20px;
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+}
+
+.secondary-image-card {
+    height: 100%;
+    min-height: 250px;
+}
+
+.field-group {
+    margin-top: 15px;
+}
+
+.field-group input[type="text"] {
+    font-size: 0.9rem;
+}
+
+.main-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #198754;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+#add-image-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
