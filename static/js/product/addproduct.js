@@ -1,22 +1,21 @@
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const MAX_SECONDARY_IMAGES = 9;
     let currentSecondaryCount = 0;
-    let activeFormIndices = new Set([0]); // Il form 0 è sempre attivo per l'immagine principale
+    let activeFormIndices = new Set([0]);
+    const formsetPrefix = document.querySelector('.formset-form')?.dataset.formPrefix || 'form';
 
-    // Debug: mostra informazioni sui form
-    console.log('Form inizializzato - Total forms:', document.getElementById('id_productimage_set-TOTAL_FORMS')?.value);
-
-    // Inizializza l'immagine principale
+    // Initialize main image
     initMainImageUpload();
 
     function initMainImageUpload() {
-    const mainContainer = document.getElementById('main-image-container');
-    const firstForm = document.querySelector('.formset-form[data-form-index="0"]');
+        const mainContainer = document.getElementById('main-image-container');
+        const mainForm = document.querySelector(`.formset-form[data-form-index="0"]`);
 
-    if (firstForm) {
-    createImageUploadCard(mainContainer, firstForm, true);
-}
-}
+        if (mainForm) {
+            createImageUploadCard(mainContainer, mainForm, true);
+            showSecondaryImagesSection();
+        }
+    }
 
     function createImageUploadCard(container, formElement, isMain = false) {
     const formIndex = formElement.dataset.formIndex;
@@ -186,41 +185,34 @@
 });
 
     function addSecondaryImage() {
-    const container = document.getElementById('secondary-images-container');
-    const availableForms = document.querySelectorAll('.formset-form');
+        const container = document.getElementById('secondary-images-container');
+        const forms = document.querySelectorAll('.formset-form');
 
-    // Trova il prossimo form disponibile (salta il primo che è per l'immagine principale)
-    let nextForm = null;
-    for (let i = 1; i < availableForms.length; i++) {
-    const form = availableForms[i];
-    const formIndex = parseInt(form.dataset.formIndex);
-    if (!activeFormIndices.has(formIndex)) {
-    nextForm = form;
-    break;
-}
-}
+        // Find next available form
+        for (let i = 1; i < forms.length; i++) {
+            const form = forms[i];
+            const formIndex = parseInt(form.dataset.formIndex);
 
-    if (nextForm) {
-    const formIndex = parseInt(nextForm.dataset.formIndex);
-    activeFormIndices.add(formIndex);
+            if (!activeFormIndices.has(formIndex)) {
+                activeFormIndices.add(formIndex);
 
-    const colDiv = document.createElement('div');
-    colDiv.className = 'col-md-4 fade-in';
-    colDiv.dataset.formIndex = formIndex;
+                const colDiv = document.createElement('div');
+                colDiv.className = 'col-md-4 fade-in';
+                colDiv.dataset.formIndex = formIndex;
 
-    createImageUploadCard(colDiv, nextForm, false);
-    container.appendChild(colDiv);
+                createImageUploadCard(colDiv, form, false);
+                container.appendChild(colDiv);
 
-    currentSecondaryCount++;
-    updateImageCounter();
-    updateAddButton();
+                currentSecondaryCount++;
+                updateImageCounter();
+                updateAddButton();
 
-    console.log(`Aggiunta immagine secondaria ${formIndex}`, {
-    currentSecondaryCount,
-    activeFormIndices: Array.from(activeFormIndices)
-});
-}
-}
+                // Show the actual form (hidden by default)
+                form.style.display = 'block';
+                break;
+            }
+        }
+    }
 
     function removeSecondaryImage(card, deleteInput) {
     const formIndex = parseInt(card.dataset.formIndex);
@@ -257,7 +249,8 @@
     console.log(`Rimossa immagine secondaria ${formIndex}`, {
     currentSecondaryCount,
     activeFormIndices: Array.from(activeFormIndices)
-});
+    });
+    updateTotalForms();
 }
 
     function updateImageCounter() {
@@ -270,57 +263,35 @@
     if (currentSecondaryCount >= MAX_SECONDARY_IMAGES) {
     addBtn.disabled = true;
     addBtn.innerHTML = '<i class="fas fa-check"></i> Limite raggiunto';
-} else {
+    }
+    else {
     addBtn.disabled = false;
     addBtn.innerHTML = '<i class="fas fa-plus"></i> Aggiungi Immagine';
+    }
 }
-}
+    function updateTotalForms() {
+        const totalFormsInput = document.getElementById(`id_${formsetPrefix}-TOTAL_FORMS`);
+        if (totalFormsInput) {
+            totalFormsInput.value = activeFormIndices.size;
+        }
+    }
 
-    // Aggiorna il management form prima del submit
-    document.querySelector('form').addEventListener('submit', function(e) {
-    const totalFormsInput = document.getElementById('id_productimage_set-TOTAL_FORMS');
-    const initialFormsInput = document.getElementById('id_productimage_set-INITIAL_FORMS');
+    // Form submission handler
+    document.getElementById('product-form').addEventListener('submit', function(e) {
+        // Validate main image exists
+        const mainImageInput = document.querySelector('.formset-form[data-form-index="0"] input[type="file"]');
+        if (mainImageInput && !mainImageInput.files.length) {
+            e.preventDefault();
+            alert('L\'immagine principale è obbligatoria!');
+            return;
+        }
 
-    // Conta i form che hanno effettivamente dati o sono marcati per eliminazione
-    let actualFormCount = 0;
-    const allForms = document.querySelectorAll('.formset-form');
+        // Update form count before submission
+        updateTotalForms();
 
-    allForms.forEach((form, index) => {
-    const formIndex = parseInt(form.dataset.formIndex);
-    const imageInput = form.querySelector('input[type="file"]');
-    const deleteInput = form.querySelector('input[name*="DELETE"]');
-
-    // Conta il form se:
-    // - Ha un'immagine caricata, O
-    // - È marcato per eliminazione (quindi esisteva già)
-    if ((imageInput && imageInput.files && imageInput.files.length > 0) ||
-    (deleteInput && deleteInput.checked)) {
-    actualFormCount++;
-}
-});
-
-    // Assicurati che almeno il form principale sia contato
-    if (actualFormCount === 0) {
-    const mainImageInput = document.querySelector('.formset-form[data-form-index="0"] input[type="file"]');
-    if (mainImageInput) {
-    actualFormCount = 1;
-}
-}
-
-    totalFormsInput.value = Math.max(actualFormCount, activeFormIndices.size);
-
-    console.log('Submit form:', {
-    totalForms: totalFormsInput.value,
-    initialForms: initialFormsInput.value,
-    activeFormIndices: Array.from(activeFormIndices),
-    actualFormCount: actualFormCount
-});
-
-    // Debug: stampa tutti i dati del form prima dell'invio
-    const formData = new FormData(e.target);
-    console.log('FormData contents:');
-    for(let pair of formData.entries()) {
-    console.log(pair[0] + ': ' + pair[1]);
-}
-});
+        // Show loading state
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvataggio...';
+    });
 });

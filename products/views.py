@@ -1,13 +1,14 @@
 from django.contrib.auth.decorators import permission_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import Http404
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
 
 from cart.models import Cart
-from products.forms import ProductForm, ProductImageFormSet
-from products.models import Category, Product
+from products.forms import ProductForm, ProductImageFormSet, ProductImageFormSetHelper
+from products.models import Category, Product, ProductImage
 
 
 # Create your views here.
@@ -84,41 +85,68 @@ class ProductListView(ListView):
 
 @permission_required('products.add_product', raise_exception=True)
 def add_product(request):
+    """
+    View per aggiungere un nuovo prodotto con le relative immagini.
+    Protetta dal permesso 'add_product'.
+    """
     if request.method == 'POST':
-        form    = ProductForm(request.POST)
+        product_form = ProductForm(request.POST)
         formset = ProductImageFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
-            product = form.save()
-            formset.instance = product
-            formset.save()
-            messages.success(request, "Prodotto creato con successo!")
-            return redirect('main')
+
+        if product_form.is_valid() and formset.is_valid():
+            try:
+                with transaction.atomic():
+                    # Salva il prodotto
+                    product = product_form.save()
+
+                    # Salva le immagini
+                    formset.instance = product
+                    instances = formset.save()
+
+                    # Verifica che ci sia almeno un'immagine principale
+                    main_images = [img for img in instances if img.is_main]
+                    if not main_images and instances:
+                        # Se non c'è un'immagine principale, imposta la prima come principale
+                        instances[0].is_main = True
+                        instances[0].save()
+                    elif len(main_images) > 1:
+                        # Se ci sono più immagini principali, mantieni solo la prima
+                        for img in main_images[1:]:
+                            img.is_main = False
+                            img.save()
+
+                messages.success(
+                    request,
+                    f'Prodotto "{product.name}" aggiunto con successo!'
+                )
+                return redirect('product_detail', product_slug=product.slug)
+                # Oppure redirect alla lista prodotti: return redirect('product_list')
+
+            except Exception as e:
+                messages.error(
+                    request,
+                    f'Errore durante il salvataggio del prodotto: {str(e)}'
+                )
+        else:
+            # Gestione errori di validazione
+            if not product_form.is_valid():
+                messages.error(request, 'Errori nel form del prodotto. Controlla i campi evidenziati.')
+            if not formset.is_valid():
+                messages.error(request, 'Errori nelle immagini. Controlla i campi evidenziati.')
+
     else:
-        form    = ProductForm()
+        # GET request - mostra form vuoti
+        product_form = ProductForm()
         formset = ProductImageFormSet()
 
-    return render(request, 'store_manager/add_product.html', {
-        'form': form,
-        'formset': formset
-    })
+    # Helper per il formset
+    formset_helper = ProductImageFormSetHelper()
 
+    context = {
+        'product_form': product_form,
+        'formset': formset,
+        'formset_helper': formset_helper,
+        'title': 'Aggiungi Nuovo Prodotto',
+    }
 
-def create_product(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST)
-        formset = ProductImageFormSet(request.POST, request.FILES)
-
-        print("Form valid:", form.is_valid())
-        print("Formset valid:", formset.is_valid())
-
-        if form.errors:
-            print("Form errors:", form.errors)
-        if formset.errors:
-            print("Formset errors:", formset.errors)
-
-        if form.is_valid() and formset.is_valid():
-            product = form.save()
-            formset.instance = product
-            formset.save()
-            return redirect('success_url')
-    # ... resto del codice
+    return render(request, 'store_manager/add_product.html', context)
