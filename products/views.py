@@ -331,7 +331,7 @@ class CategoryUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
     form_class = CategoryForm
     template_name = 'category/category_form.html'
     permission_required = 'products.change_category'
-    success_url = reverse_lazy('category_list')
+    success_url = reverse_lazy('manage_catalog')
 
     def form_valid(self, form):
         messages.success(self.request, f'Categoria "{form.instance.name}" aggiornata con successo.')

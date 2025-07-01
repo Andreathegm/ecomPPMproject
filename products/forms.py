@@ -7,6 +7,7 @@ from crispy_forms.layout import Layout, Div, Row, Column, HTML, Field
 from django.utils.text import slugify
 from .models import Product, ProductImage, Category
 
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
@@ -98,7 +99,7 @@ EditImageFormSet = inlineformset_factory(
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['name', 'slug', 'description', 'image']
+        fields = ['name','description', 'image']
         widgets = {
             'name':        forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome categoria'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descrizione (opzionale)'}),
