@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gestione Catalogo - ShopEasy{% endblock title %}
+
+{% block content %}
+    <div class="container my-5">
+        <!-- Intestazione della Pagina -->
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h1>Manage Catalog</h1>
+                <p class="lead">Gestisci prodotti e categorie del tuo negozio.</p>
+            </div>
+        </div>
+
+        <!-- Campo di Ricerca -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <form method="get" action="{% url 'manage_catalog' %}">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Cerca categoria o prodotto..." value="{{ request.GET.search }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i> Cerca
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Colonna Sinistra: Filtri e Ordinamento -->
+            <div class="col-lg-3">
+                <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5 class="mb-0">Filter and order products</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" action="">
+                            <!-- Filtro per Categoria -->
+                            <h6>Category</h6>
+                            <select class="form-select mb-4" name="category" id="categoryDropdown">
+                                <option value="">Tutte le Categorie</option>
+                                {% for category in category_list %}
+                                    <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                {% empty %}
+                                    <option disabled>No categories found</option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Filtro per Prezzo -->
+                            <h6>Max price</h6>
+                            <label for="priceRange" class="form-label">Max price: €<span id="priceValue">{{ selected_max_price|default:1000 }}</span></label>
+                            <input type="range" class="form-range" name="max_price" min="0" max="1000" id="priceRange" value="{{ selected_max_price|default:1000 }}" oninput="document.getElementById('priceValue').textContent = this.value">
+
+                            <!-- Ordinamento -->
+                            <h6>Order by</h6>
+                            <select class="form-select mb-4" name="order">
+                                <option value="" {% if not selected_order %}selected{% endif %}>Predefinito</option>
+                                <option value="1" {% if selected_order == '1' %}selected{% endif %}>Prezzo: crescente</option>
+                                <option value="2" {% if selected_order == '2' %}selected{% endif %}>Prezzo: decrescente</option>
+                                <option value="3" {% if selected_order == '3' %}selected{% endif %}>Più recenti</option>
+                            </select>
+
+                            <button type="submit" class="btn btn-sm btn-outline-dark mt-2">Apply filters</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonna Destra: Categorie e Prodotti -->
+            <div class="col-lg-9">
+                <!-- Sezione Categorie -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>Categorie</h3>
+                        <a href="{% url 'category_add' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Nuova Categoria
+                        </a>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                        {% for category in categories %}
+                            <div class="col">
+                                <div class="card h-100 border-info">
+                                    <div class="card-header bg-info text-white text-center">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-folder"></i> {{ category.name }}
+                                        </h6>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <p class="card-text small text-muted">{{ category.description|default:"Nessuna descrizione" }}</p>
+                                        <div class="btn-group-vertical d-grid gap-2">
+                                            <a href="{% url 'category_add' %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> Modify
+                                            </a>
+                                            <a href="{% url 'category_edit' category.id %}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <form method="post" action="{% url 'main'%}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Sei sicuro di voler eliminare la categoria: {{ category.name }}?')">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle"></i> Nessuna categoria trovata.
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Sezione Prodotti -->
+                <div class="mb-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>Prodotti</h3>
+                        <a href="{% url 'add_product' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus"></i> Nuovo Prodotto
+                        </a>
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        {% for product in page_obj|default:products %}
+                            <div class="col">
+                                <div class="card h-100 text-center shadow-sm position-relative">
+                                    <!-- Badge Stock Status -->
+                                    {% if product.stock <= 5 %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            Stock Basso
+                                        </span>
+                                    {% elif product.stock <= 10 %}
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
+                                            Stock Medio
+                                        </span>
+                                    {% endif %}
+
+                                    <div class="position-relative">
+                                        <img src="{{ product.image.url|default:'https://placehold.co/300x300/eee/333?text=Prodotto' }}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                    </div>
+
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">{{ product.name|default:"Nome Prodotto" }}</h5>
+                                        <p class="card-text fw-bold text-primary fs-5">€{{ product.price|default:"49.99" }}</p>
+                                        <p class="card-text small text-muted">Stock: {{ product.stock|default:"N/A" }}</p>
+                                        <p class="card-text small text-muted">Categoria: {{ product.category.name|default:"Non assegnata" }}</p>
+
+                                        <div class="mt-auto">
+                                            <div class="btn-group-vertical d-grid gap-2">
+                                                <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                <a href="{% url 'modify_product' product.id %}" class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <form method="post" action="{% url 'delete_product' product.id %}" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Sei sicuro di voler eliminare questo prodotto: {{ product.name }}?')">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="fas fa-info-circle"></i> Nessun prodotto trovato che corrisponda ai criteri di ricerca.
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Paginazione -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-5 d-flex justify-content-center">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">
+                                        Precedente
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">Precedente</span></li>
+                            {% endif %}
+
+                            {% for i in page_obj.paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">
+                                            {{ i }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">
+                                        Successiva
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">Successiva</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

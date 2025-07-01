@@ -86,6 +86,11 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
                             <li><a class="dropdown-item" href="#">My Account</a></li>
                             <li><a class="dropdown-item" href="{% url 'order_history' %}">Order History</a></li>
+                            {% if user.is_manager or user.is_superuser %}
+                            <li><a class="dropdown-item" href="{% url 'manage_catalog' %}">Manage Product & Categories</a></li>
+                            <li><a class="dropdown-item" href="{% url 'manage_catalog' %}">Manage Orders</a></li>
+
+                            {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 {% if user.is_authenticated %}

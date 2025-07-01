@@ -1,276 +1,242 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}{{ title }} - Il Mio E-commerce{% endblock %}
-
 {% block content %}
-    <div class="container-fluid py-4">
-        <div class="row justify-content-center">
-            <div class="col-12 col-xl-10">
-                <!-- Header -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h1 class="h3 mb-1">{{ title }}</h1>
-                        <p class="text-muted mb-0">Inserisci i dettagli del nuovo prodotto e carica le immagini</p>
+    <div class="container py-4">
+        <h1 class="mb-3">{{ title }}</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+                <!-- Dettagli Prodotto -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">Dettagli Prodotto</div>
+                        {{ product_form|crispy }}
                     </div>
-                    <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Torna alla Lista
-                    </a>
                 </div>
 
-                <!-- Form -->
-                <form method="post" enctype="multipart/form-data" id="product-form">
-                    {% csrf_token %}
+                <!-- Immagini -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">Immagini Prodotto</div>
+                        <div class="card-body">
+                            {{ formset.management_form }}
 
-                    <div class="row">
-                        <!-- Sezione Prodotto -->
-                        <div class="col-12 col-lg-6 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-primary text-white">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-box"></i> Dettagli Prodotto
-                                    </h5>
-                                </div>
-                                {% crispy product_form %}
-                            </div>
-                        </div>
-
-                        <!-- Sezione Immagini -->
-                        <div class="col-12 col-lg-6 mb-4">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-success text-white">
-                                    <h5 class="card-title mb-0">
-                                        <i class="fas fa-images"></i> Immagini Prodotto
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted small mb-3">
-                                        Aggiungi almeno un'immagine per il prodotto.
-                                        Seleziona "Immagine principale" per l'immagine che apparirà come copertina.
-                                    </p>
-
-                                    <!-- Management form (obbligatorio per i formset) -->
-                                    {{ formset.management_form }}
-
-                                    <!-- Debug: mostra i nomi dei campi management form -->
-                                    {% comment %}
-                                {% for field in formset.management_form %}
-                                    <!-- {{ field.name }}: {{ field.value }} -->
+                            <div id="formset-container">
+                                {% for form in formset %}
+                                    <div class="image-form-item">
+                                        {{ form|crispy }}
+                                    </div>
                                 {% endfor %}
-                                {% endcomment %}
-
-                                    <!-- Container per i form delle immagini -->
-                                    <div id="formset-container">
-                                        {% for form in formset %}
-                                            <div data-form-index="{{ forloop.counter0 }}">
-                                                {% crispy form %}
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-
-                                    <!-- Bottone per aggiungere nuova immagine -->
-                                    <div class="mt-3">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="add-image-form">
-                                            <i class="fas fa-plus"></i> Aggiungi altra immagine
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
+
+                            <button type="button" class="btn btn-outline-secondary btn-sm mt-3" id="add-image">
+                                <i class="fas fa-plus"></i> Aggiungi altra immagine
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Bottoni di azione -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card shadow-sm">
-                                <div class="card-body text-center">
-                                    <button type="submit" class="btn btn-primary btn-lg px-5" form="product-form">
-                                        <i class="fas fa-save"></i> Salva Prodotto
-                                    </button>
-                                    <a href="{% url 'product_list' %}" class="btn btn-outline-secondary btn-lg px-5 ms-3">
-                                        <i class="fas fa-times"></i> Annulla
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i>
+                    {% if is_edit %}Salva Modifiche{% else %}Salva Prodotto{% endif %}
+                </button>
+                <a href="{% url 'manage_catalog' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                    <i class="fas fa-times"></i> Annulla
+                </a>
+            </div>
+        </form>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const formsetContainer = document.getElementById('formset-container');
-            const addButton = document.getElementById('add-image-form');
-            const managementFormPrefix = 'images'; // Assicurati che questo sia il prefix del tuo formset
-
-            let totalFormsInput = document.querySelector(`input[name="${managementFormPrefix}-TOTAL_FORMS"]`);
-            let maxFormsInput = document.querySelector(`input[name="${managementFormPrefix}-MAX_NUM_FORMS"]`);
-
-            if (!totalFormsInput) {
-                console.error('Campo TOTAL_FORMS non trovato! Controlla il prefix del formset.');
-                return;
-            }
-
-            let formCount = parseInt(totalFormsInput.value);
-
-            function updateFormIndex(form, newIndex) {
-                const regex = new RegExp(`(${managementFormPrefix}-)(\\d+)(-.+)`);
-                form.setAttribute('data-form-index', newIndex);
-                const header = form.querySelector('h6');
-                if (header) {
-                    header.textContent = `Immagine ${newIndex + 1}`;
-                }
-                form.querySelectorAll('input, select, textarea, label').forEach(element => {
-                    if (element.name) {
-                        element.name = element.name.replace(regex, `$1${newIndex}$3`);
-                    }
-                    if (element.id) {
-                        element.id = element.id.replace(regex, `$1${newIndex}$3`);
-                    }
-                    if (element.tagName === 'LABEL' && element.htmlFor) {
-                        element.htmlFor = element.htmlFor.replace(regex, `$1${newIndex}$3`);
-                    }
-                });
-            }
-
-            function reindexAllForms() {
-                const forms = formsetContainer.querySelectorAll('.image-form-item');
-                let visibleFormIndex = 0;
-                forms.forEach((form) => {
-                    const deleteInput = form.querySelector('input[name$="-DELETE"]');
-                    const isMarkedForDeletion = deleteInput && deleteInput.checked;
-                    if (!isMarkedForDeletion) {
-                        updateFormIndex(form, visibleFormIndex);
-                        visibleFormIndex++;
-                    }
-                });
-                totalFormsInput.value = forms.length;
-            }
-
-            function addRemoveButton(form) {
-                const header = form.querySelector('.d-flex.justify-content-between');
-                if (header && !header.querySelector('.remove-form')) {
-                    const removeBtn = document.createElement('button');
-                    removeBtn.type = 'button';
-                    removeBtn.className = 'btn btn-outline-danger btn-sm remove-form';
-                    removeBtn.innerHTML = '<i class="fas fa-trash"></i> Rimuovi';
-                    header.appendChild(removeBtn);
-                }
-            }
-
-            // ====================================================================
-            // NUOVA FUNZIONE: Gestisce la creazione dell'anteprima dell'immagine
-            // ====================================================================
-            function handleImagePreview(event) {
-                const input = event.target;
-                if (input.files && input.files[0]) {
-                    const reader = new FileReader();
-
-                    reader.onload = function(e) {
-                        // Trova il contenitore del campo immagine
-                        const imageFieldContainer = input.closest('.form-group');
-                        if (!imageFieldContainer) return;
-
-                        // Cerca un'anteprima esistente per rimuoverla
-                        let preview = imageFieldContainer.querySelector('.image-preview');
-                        if (!preview) {
-                            // Se non esiste, crea un nuovo elemento per l'anteprima
-                            preview = document.createElement('div');
-                            preview.className = 'mt-2 image-preview';
-                            imageFieldContainer.appendChild(preview);
-                        }
-
-                        // Aggiorna l'anteprima con la nuova immagine
-                        preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="max-height: 100px;" alt="Anteprima immagine">`;
-                    }
-
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-
-            addButton.addEventListener('click', function() {
-                const maxForms = maxFormsInput ? parseInt(maxFormsInput.value) : 1000;
-                const currentFormCount = formsetContainer.querySelectorAll('.image-form-item').length;
-                if (currentFormCount >= maxForms) {
-                    alert('Numero massimo di immagini raggiunto!');
-                    return;
-                }
-
-                const templateForm = formsetContainer.querySelector('.image-form-item');
-                if (!templateForm) {
-                    console.error("Template form non trovato.");
-                    return;
-                }
-
-                const newForm = templateForm.cloneNode(true);
-
-                newForm.querySelectorAll('input, textarea').forEach(input => {
-                    if (input.type !== 'hidden') {
-                        input.value = '';
-                    }
-                    if (input.type === 'checkbox' && !input.name.endsWith('DELETE')) {
-                        input.checked = false;
-                    }
-                });
-
-                // Rimuovi l'anteprima dell'immagine se presente nel template clonato
-                const preview = newForm.querySelector('.image-preview');
-                if (preview) preview.remove();
-
-                // Rimuovi anche il link all'immagine corrente, se presente
-                const currentImageLink = newForm.querySelector('a[href*="/media/"]');
-                if (currentImageLink) currentImageLink.parentElement.innerHTML = '';
-
-
-                const deleteInput = newForm.querySelector('input[name$="-DELETE"]');
-                if (deleteInput) {
-                    deleteInput.checked = false;
-                }
-
-                addRemoveButton(newForm);
-
-                // Usa il numero corrente di form come nuovo indice
-                updateFormIndex(newForm, currentFormCount);
-                formsetContainer.appendChild(newForm);
-
-                // Aggiorna il valore di TOTAL_FORMS
-                totalFormsInput.value = currentFormCount + 1;
-            });
-
-            formsetContainer.addEventListener('click', function(e) {
-                const removeButton = e.target.closest('.remove-form');
-                if (removeButton) {
-                    const formToRemove = removeButton.closest('.image-form-item');
-                    const deleteInput = formToRemove.querySelector('input[name$="-DELETE"]');
-
-                    if (deleteInput) {
-                        deleteInput.checked = true;
-                        formToRemove.style.display = 'none';
-                    } else {
-                        formToRemove.remove();
-                    }
-                    // Non è necessario re-indicizzare qui, Django gestisce gli indici mancanti
-                    // ma aggiorniamo il conteggio se necessario per la logica del pulsante 'add'
-                    // In questo caso, lasciamo che sia il backend a gestire la numerazione.
-                }
-            });
-
-            // ====================================================================
-            // NUOVO EVENT LISTENER: Ascolta i cambiamenti su tutti i file input
-            // ====================================================================
-            formsetContainer.addEventListener('change', function(e) {
-                if (e.target.tagName === 'INPUT' && e.target.type === 'file') {
-                    handleImagePreview(e);
-                }
-            });
-
-
-            console.log('Formset JavaScript inizializzato.');
+        // JS minimo per duplicare i formset (clonazione raw)
+        document.getElementById('add-image').addEventListener('click', () => {
+            const container = document.getElementById('formset-container');
+            const totalForms = document.querySelector('[name="images-TOTAL_FORMS"]');
+            let count = parseInt(totalForms.value);
+            const newHtml = container.children[0].outerHTML.replace(/images-0/g, `images-${count}`);
+            container.insertAdjacentHTML('beforeend', newHtml);
+            totalForms.value = count + 1;
         });
-
     </script>
+{% endblock %}
+
+
+{#    <script>#}
+{#        document.addEventListener('DOMContentLoaded', function() {#}
+{#            const formsetContainer = document.getElementById('formset-container');#}
+{#            const addButton = document.getElementById('add-image-form');#}
+{#            const managementFormPrefix = 'images'; // Assicurati che questo sia il prefix del tuo formset#}
+{##}
+{#            let totalFormsInput = document.querySelector(`input[name="${managementFormPrefix}-TOTAL_FORMS"]`);#}
+{#            let maxFormsInput = document.querySelector(`input[name="${managementFormPrefix}-MAX_NUM_FORMS"]`);#}
+{##}
+{#            if (!totalFormsInput) {#}
+{#                console.error('Campo TOTAL_FORMS non trovato! Controlla il prefix del formset.');#}
+{#                return;#}
+{#            }#}
+{##}
+{#            let formCount = parseInt(totalFormsInput.value);#}
+{##}
+{#            function updateFormIndex(form, newIndex) {#}
+{#                const regex = new RegExp(`(${managementFormPrefix}-)(\\d+)(-.+)`);#}
+{#                form.setAttribute('data-form-index', newIndex);#}
+{#                const header = form.querySelector('h6');#}
+{#                if (header) {#}
+{#                    header.textContent = `Immagine ${newIndex + 1}`;#}
+{#                }#}
+{#                form.querySelectorAll('input, select, textarea, label').forEach(element => {#}
+{#                    if (element.name) {#}
+{#                        element.name = element.name.replace(regex, `$1${newIndex}$3`);#}
+{#                    }#}
+{#                    if (element.id) {#}
+{#                        element.id = element.id.replace(regex, `$1${newIndex}$3`);#}
+{#                    }#}
+{#                    if (element.tagName === 'LABEL' && element.htmlFor) {#}
+{#                        element.htmlFor = element.htmlFor.replace(regex, `$1${newIndex}$3`);#}
+{#                    }#}
+{#                });#}
+{#            }#}
+{##}
+{#            function reindexAllForms() {#}
+{#                const forms = formsetContainer.querySelectorAll('.image-form-item');#}
+{#                let visibleFormIndex = 0;#}
+{#                forms.forEach((form) => {#}
+{#                    const deleteInput = form.querySelector('input[name$="-DELETE"]');#}
+{#                    const isMarkedForDeletion = deleteInput && deleteInput.checked;#}
+{#                    if (!isMarkedForDeletion) {#}
+{#                        updateFormIndex(form, visibleFormIndex);#}
+{#                        visibleFormIndex++;#}
+{#                    }#}
+{#                });#}
+{#                totalFormsInput.value = forms.length;#}
+{#            }#}
+{##}
+{#            function addRemoveButton(form) {#}
+{#                const header = form.querySelector('.d-flex.justify-content-between');#}
+{#                if (header && !header.querySelector('.remove-form')) {#}
+{#                    const removeBtn = document.createElement('button');#}
+{#                    removeBtn.type = 'button';#}
+{#                    removeBtn.className = 'btn btn-outline-danger btn-sm remove-form';#}
+{#                    removeBtn.innerHTML = '<i class="fas fa-trash"></i> Rimuovi';#}
+{#                    header.appendChild(removeBtn);#}
+{#                }#}
+{#            }#}
+{##}
+{#            // ====================================================================#}
+{#            // NUOVA FUNZIONE: Gestisce la creazione dell'anteprima dell'immagine#}
+{#            // ====================================================================#}
+{#            function handleImagePreview(event) {#}
+{#                const input = event.target;#}
+{#                if (input.files && input.files[0]) {#}
+{#                    const reader = new FileReader();#}
+{##}
+{#                    reader.onload = function(e) {#}
+{#                        // Trova il contenitore del campo immagine#}
+{#                        const imageFieldContainer = input.closest('.form-group');#}
+{#                        if (!imageFieldContainer) return;#}
+{##}
+{#                        // Cerca un'anteprima esistente per rimuoverla#}
+{#                        let preview = imageFieldContainer.querySelector('.image-preview');#}
+{#                        if (!preview) {#}
+{#                            // Se non esiste, crea un nuovo elemento per l'anteprima#}
+{#                            preview = document.createElement('div');#}
+{#                            preview.className = 'mt-2 image-preview';#}
+{#                            imageFieldContainer.appendChild(preview);#}
+{#                        }#}
+{##}
+{#                        // Aggiorna l'anteprima con la nuova immagine#}
+{#                        preview.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="max-height: 100px;" alt="Anteprima immagine">`;#}
+{#                    }#}
+{##}
+{#                    reader.readAsDataURL(input.files[0]);#}
+{#                }#}
+{#            }#}
+{##}
+{#            addButton.addEventListener('click', function() {#}
+{#                const maxForms = maxFormsInput ? parseInt(maxFormsInput.value) : 1000;#}
+{#                const currentFormCount = formsetContainer.querySelectorAll('.image-form-item').length;#}
+{#                if (currentFormCount >= maxForms) {#}
+{#                    alert('Numero massimo di immagini raggiunto!');#}
+{#                    return;#}
+{#                }#}
+{##}
+{#                const templateForm = formsetContainer.querySelector('.image-form-item');#}
+{#                if (!templateForm) {#}
+{#                    console.error("Template form non trovato.");#}
+{#                    return;#}
+{#                }#}
+{##}
+{#                const newForm = templateForm.cloneNode(true);#}
+{##}
+{#                newForm.querySelectorAll('input, textarea').forEach(input => {#}
+{#                    if (input.type !== 'hidden') {#}
+{#                        input.value = '';#}
+{#                    }#}
+{#                    if (input.type === 'checkbox' && !input.name.endsWith('DELETE')) {#}
+{#                        input.checked = false;#}
+{#                    }#}
+{#                });#}
+{##}
+{#                // Rimuovi l'anteprima dell'immagine se presente nel template clonato#}
+{#                const preview = newForm.querySelector('.image-preview');#}
+{#                if (preview) preview.remove();#}
+{##}
+{#                // Rimuovi anche il link all'immagine corrente, se presente#}
+{#                const currentImageLink = newForm.querySelector('a[href*="/media/"]');#}
+{#                if (currentImageLink) currentImageLink.parentElement.innerHTML = '';#}
+{##}
+{##}
+{#                const deleteInput = newForm.querySelector('input[name$="-DELETE"]');#}
+{#                if (deleteInput) {#}
+{#                    deleteInput.checked = false;#}
+{#                }#}
+{##}
+{#                addRemoveButton(newForm);#}
+{##}
+{#                // Usa il numero corrente di form come nuovo indice#}
+{#                updateFormIndex(newForm, currentFormCount);#}
+{#                formsetContainer.appendChild(newForm);#}
+{##}
+{#                // Aggiorna il valore di TOTAL_FORMS#}
+{#                totalFormsInput.value = currentFormCount + 1;#}
+{#            });#}
+{##}
+{#            formsetContainer.addEventListener('click', function(e) {#}
+{#                const removeButton = e.target.closest('.remove-form');#}
+{#                if (removeButton) {#}
+{#                    const formToRemove = removeButton.closest('.image-form-item');#}
+{#                    const deleteInput = formToRemove.querySelector('input[name$="-DELETE"]');#}
+{##}
+{#                    if (deleteInput) {#}
+{#                        deleteInput.checked = true;#}
+{#                        formToRemove.style.display = 'none';#}
+{#                    } else {#}
+{#                        formToRemove.remove();#}
+{#                    }#}
+{#                    // Non è necessario re-indicizzare qui, Django gestisce gli indici mancanti#}
+{#                    // ma aggiorniamo il conteggio se necessario per la logica del pulsante 'add'#}
+{#                    // In questo caso, lasciamo che sia il backend a gestire la numerazione.#}
+{#                }#}
+{#            });#}
+{##}
+{#            // ====================================================================#}
+{#            // NUOVO EVENT LISTENER: Ascolta i cambiamenti su tutti i file input#}
+{#            // ====================================================================#}
+{#            formsetContainer.addEventListener('change', function(e) {#}
+{#                if (e.target.tagName === 'INPUT' && e.target.type === 'file') {#}
+{#                    handleImagePreview(e);#}
+{#                }#}
+{#            });#}
+{##}
+{##}
+{#            console.log('Formset JavaScript inizializzato.');#}
+{#        });#}
+{##}
+{#    </script>#}
 
     <style>
         .image-form-item {
@@ -302,5 +268,7 @@
         .invalid-feedback {
             font-size: 0.875em;
         }
+        .image-preview{
+            max-height: 100px;
+        }
     </style>
-{% endblock %}

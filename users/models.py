@@ -25,7 +25,7 @@ class CustomUser(AbstractUser):
         return f"{self.username} ({self.get_user_type_display()})"
 
     @property
-    def is_manager(self):
+    def is_manager(self) -> bool:
         return self.user_type == self.UserType.MANAGER
 
     @property
