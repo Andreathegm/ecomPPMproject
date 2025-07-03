@@ -8,7 +8,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const stock_value = parseInt(input.textContent.split(':')[1]);
         const quantityInput = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
         const inputValue = parseInt(quantityInput.value);
+        if (inputValue === 1){
+            document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="decrease"]`).classList.add('disabled');
+        }
+        if (inputValue === stock_value){
+            document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="increase"]`).classList.add('disabled');
+        }
         itemData[itemId] = {
+            stock_value: stock_value,
             remaining_product: stock_value - inputValue,
         };
     });
@@ -18,28 +25,38 @@ document.addEventListener('DOMContentLoaded', function () {
     updateButtons.forEach(button => {
         button.addEventListener('click', function () {
             const itemId = this.getAttribute('data-item-id');
-            const stock_value = parseInt(button.textContent.split(':')[1])
+            const stock_value = itemData[itemId].stock_value;
             const action = this.getAttribute('data-action');
             const quantityInput = document.querySelector(`.quantity-input[data-item-id="${itemId}"]`);
-            let remaining_prod = itemData[itemId].remaining_product;
-            const quantity = parseInt(quantityInput.value);
-            let newQuantity = quantity;
+            const current_quantity = parseInt(quantityInput.value);
+            let plusQuantity = current_quantity + 1;
+            let minusQuantity = current_quantity - 1;
+            let newQuantity = 0
+            console.log(itemData[itemId].remaining_product, stock_value, current_quantity, plusQuantity, minusQuantity);
 
-            if (action === 'increase' && newQuantity <= stock_value) {
-                newQuantity++;
+
+
+            if (action === 'increase' && plusQuantity <= stock_value) {
                 itemData[itemId].remaining_product--;
+                newQuantity = plusQuantity;
             }
-            else if (newQuantity > stock_value){
+            else if (action === 'increase' && plusQuantity > stock_value){
                 alert(`You can only order ${stock_value} items`);
                 document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="increase"]`).classList.add('disabled');
+                newQuantity = current_quantity;
 
             }
-            else if (action === 'decrease' && newQuantity > 1 ) {
-                if (newQuantity === 2) {
-                    document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="increase"]`).classList.remove('disabled');
+            else if (action === 'decrease') {
+                if (minusQuantity === 1) {
+                    document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="decrease"]`).classList.add('disabled');
+
                 }
-                newQuantity--;
+                if (minusQuantity === stock_value-1) {
+                    document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="increase"]`).classList.remove('disabled');
+
+                }
                 itemData[itemId].remaining_product++;
+                newQuantity = minusQuantity;
 
 
             }
@@ -48,10 +65,9 @@ document.addEventListener('DOMContentLoaded', function () {
             // Update the quantity input field
             quantityInput.value = newQuantity;
 
-            if (newQuantity === 1 ) {
-                this.classList.add('disabled');
-            } else if(quantity === 1 && newQuantity > 1 && action === 'increase') {
+            if (newQuantity > 1 && newQuantity < stock_value) {
                 document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="decrease"]`).classList.remove('disabled');
+                document.querySelector(`.update-quantity[data-item-id="${itemId}"][data-action="increase"]`).classList.remove('disabled');
 
             }
 
@@ -110,3 +126,5 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+

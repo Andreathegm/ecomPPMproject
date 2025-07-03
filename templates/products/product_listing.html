@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Tutti i Prodotti - ShopEasy{% endblock title %}
+{% block title %}Catalog - ShopFrontier{% endblock title %}
 
 {% block content %}
     <div class="container my-5">
@@ -9,7 +9,7 @@
         <div class="row text-center mb-5">
             <div class="col-12">
                 <h1>Our Catalog</h1>
-                <p class="lead">Esplora la nostra selezione completa di prodotti di alta qualità.</p>
+                <p class="lead">Explore all our product to find all you need.</p>
             </div>
         </div>
 
@@ -121,13 +121,19 @@
                                     <h5 class="card-title">
                                         <a href="#" class="text-decoration-none text-dark">{{ product.name|default:"Nome Prodotto" }}</a>
                                     </h5>
+
+                                    <p>{{ product.short_description|default:"Short description" }}</p>
                                     <p class="card-text fw-bold text-primary fs-5 mt-auto">€{{ product.price|default:"49.99" }}</p>
                                     {% if product.stock == 0 %}
                                         <p class="text-danger fw-bold">Out of Stock</p>
+                                    {% else %}
+                                        <div class="d-flex justify-content-center">
+                                            <span class="badge bg-success w-30">In stock: {{ product.stock }}</span>
+                                        </div>
                                     {% endif %}
                                         <form method="post" action="{% url 'product_detail' product.slug %}" class="mt-2">
                                             {% csrf_token %}
-                                            <button type="submit" class="btn btn-success w-100">View Details</button>
+                                            <button type="submit" class="btn btn-primary w-100">View Details</button>
                                         </form>
                                 </div>
                             </div>

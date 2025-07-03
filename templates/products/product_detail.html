@@ -64,7 +64,7 @@
                         <div class="row g-3 align-items-center">
                             <div class="col-md-4">
                                 <label for="quantity" class="form-label">Quantity:</label>
-                                <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="10">
+                                <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
                             </div>
                             <div class="col-md-8">
                                 <button type="submit" class="btn btn-success btn-lg w-100 mt-md-4">
@@ -78,6 +78,11 @@
                     <div class="alert alert-danger text-center mt-4 mx-auto" role="alert" style="width: 50%;">
                         <i class="fas fa-exclamation-circle me-2"></i> This item is currently out of stock.
                     </div>
+                {% else %}
+                    <div class="alert alert-success text-center mt-4  d-flex align-items-center justify-content-center" role="alert" style="width: 40%; height: 30px;">
+                        <span>In stock: {{ product.stock }} items available.</span>
+                    </div>
+
                 {% endif %}
 
 
@@ -180,4 +185,5 @@
             document.getElementById('mainProductImage').src = src;
         }
     </script>
+    <script src="{% static 'js/product/custom_alert_product.js' %}"></script>
 {% endblock footer_js %}
