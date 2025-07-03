@@ -37,11 +37,42 @@
 
                             <!-- Filtro per Prezzo -->
                             <h6>Max price</h6>
-                            <label for="priceRange" class="form-label">Max price: €<span id="priceValue">{{ selected_max_price|default:1000 }}</span></label>
-                            <input type="range" class="form-range" name="max_price" min="0" max="1000" id="priceRange" value="{{ selected_max_price|default:1000 }}" oninput="document.getElementById('priceValue').textContent = this.value">
+
+                            <label for="priceRange" class="form-label">
+                                Max price: €<span id="priceValue">{{ selected_max_price|default:1000 }}</span>
+                            </label>
+
+                            <div class="d-flex align-items-center">
+                                <button
+                                        type="button"
+                                        class="btn btn-outline-secondary btn-sm me-2"
+                                        id="priceDecrement"
+                                >
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+
+                                <input
+                                        type="range"
+                                        class="form-range flex-grow-1"
+                                        name="max_price"
+                                        id="priceRange"
+                                        min="0"
+                                        max="1000"
+                                        value="{{ selected_max_price|default:1000 }}"
+                                >
+
+                                <button
+                                        type="button"
+                                        class="btn btn-outline-secondary btn-sm ms-2"
+                                        id="priceIncrement"
+                                >
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+
 
                             <!-- Ordinamento -->
-                            <h6>Order by</h6>
+                            <h6 class ="mt-3">Order by</h6>
                             <select class="form-select mb-4" name="order">
                                 <option value="" {% if not selected_order %}selected{% endif %}>Predefinito</option>
                                 <option value="1" {% if selected_order == '1' %}selected{% endif %}>Prezzo: crescente</option>
@@ -49,7 +80,7 @@
                                 <option value="3" {% if selected_order == '3' %}selected{% endif %}>Più recenti</option>
                             </select>
 
-                            <button type="submit" class="btn btn-sm btn-outline-dark mt-2">Apply filters</button>
+                            <button type="submit" class="btn btn-sm btn-outline-dark mt-2">Apply filters   <i class="fa-solid fa-arrow-right"></i></button>
                         </form>
                     </div>
                 </div>
@@ -59,25 +90,51 @@
             <div class="col-lg-9">
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     {# Inizia il loop dei prodotti. Usa page_obj se usi la paginazione di Django. #}
+{#                    {% for product in page_obj|default:products %}#}
+{#                        <div class="col">#}
+{#                            <div class="card h-100 text-center shadow-sm">#}
+{#                                <a href="#">#}
+{#                                    <img src="{{ product.get_main_image}}" class="card-img-top p-3" alt="{{ product.name }}">#}
+{#                                </a>#}
+{#                                <div class="card-body d-flex flex-column">#}
+{#                                    <h5 class="card-title"><a href="#" class="text-decoration-none text-dark">{{ product.name|default:"Nome Prodotto" }}</a></h5>#}
+{#                                    <p class="card-text fw-bold text-primary fs-5 mt-auto">€{{ product.price|default:"49.99" }}</p>#}
+{#                                    <form method="post" action="{% url 'product_detail' product.slug %}" class="mt-2">#}
+{#                                        {% csrf_token %}#}
+{#                                        <button type="submit" class="btn btn-success w-100">View Details</button>#}
+{#                                    </form>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    {% empty %}#}
+{#                        <div class="col-12">#}
+{#                            <p class="text-center">No product found.</p>#}
+{#                        </div>#}
+{#                    {% endfor %}#}
                     {% for product in page_obj|default:products %}
                         <div class="col">
                             <div class="card h-100 text-center shadow-sm">
                                 <a href="#">
-                                    <img src="{{ product.image.url|default:'https://placehold.co/300x300/eee/333?text=Prodotto' }}" class="card-img-top p-3" alt="{{ product.name }}">
+                                    <img src="{{ product.get_main_image }}" class="card-img-top p-3" alt="{{ product.name }}">
                                 </a>
                                 <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title"><a href="#" class="text-decoration-none text-dark">{{ product.name|default:"Nome Prodotto" }}</a></h5>
+                                    <h5 class="card-title">
+                                        <a href="#" class="text-decoration-none text-dark">{{ product.name|default:"Nome Prodotto" }}</a>
+                                    </h5>
                                     <p class="card-text fw-bold text-primary fs-5 mt-auto">€{{ product.price|default:"49.99" }}</p>
-                                    <form method="post" action="{% url 'product_detail' product.slug %}" class="mt-2">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-success w-100">View Details</button>
-                                    </form>
+                                    {% if product.stock == 0 %}
+                                        <p class="text-danger fw-bold">Out of Stock</p>
+                                    {% endif %}
+                                        <form method="post" action="{% url 'product_detail' product.slug %}" class="mt-2">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success w-100">View Details</button>
+                                        </form>
                                 </div>
                             </div>
                         </div>
                     {% empty %}
                         <div class="col-12">
-                            <p class="text-center">Nessun prodotto trovato che corrisponda ai criteri di ricerca.</p>
+                            <p class="text-center">No product found.</p>
                         </div>
                     {% endfor %}
                     {# Fine del loop #}
@@ -102,9 +159,9 @@
                             {% endfor %}
 
                             {% if page_obj.has_next %}
-                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Successiva</a></li>
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next Page</a></li>
                             {% else %}
-                                <li class="page-item disabled"><span class="page-link">Successiva</span></li>
+                                <li class="page-item disabled"><span class="page-link">Next Page</span></li>
                             {% endif %}
                         </ul>
                     </nav>
@@ -113,3 +170,6 @@
         </div>
     </div>
 {% endblock content %}
+{% block footer_js %}
+    <script src="{% static 'js/product/price_slider.js' %}"></script>
+{% endblock footer_js %}

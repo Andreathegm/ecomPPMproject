@@ -98,9 +98,9 @@
                                             <a href="{% url 'category_edit' category.id %}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
-                                            <form method="post" action="{% url 'main'%}" style="display: inline;">
+                                            <form method="post" action="{% url 'category_delete' category.id %}" style="display: inline;">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Sei sicuro di voler eliminare la categoria: {{ category.name }}?')">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure to eliminate the category named : {{ category.name }}?')">
                                                     <i class="fas fa-trash"></i> Delete
                                                 </button>
                                             </form>
@@ -143,7 +143,7 @@
                                     {% endif %}
 
                                     <div class="position-relative">
-                                        <img src="{{ product.image.url|default:'https://placehold.co/300x300/eee/333?text=Prodotto' }}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                        <img src="{{product.get_main_image}}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
                                     </div>
 
                                     <div class="card-body d-flex flex-column">

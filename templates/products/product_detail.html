@@ -11,30 +11,37 @@
             <!-- Colonna Sinistra: Galleria Immagini Prodotto -->
             <div class="col-lg-6">
                 <div class="mb-3">
-                    <img id="mainProductImage" src="{{ product.main_image.url|default:'https://placehold.co/600x600/eee/333?text=Immagine+Prodotto' }}" class="img-fluid rounded border w-100" alt="{{ product.name }}">
+                    <img id="mainProductImage" src="{{ product.get_main_image|default:'https://placehold.co/600x600/eee/333?text=Immagine+Prodotto' }}" class="img-fluid rounded border w-100" alt="{{ product.name }}">
                 </div>
                 <!-- Thumbnails - Aggiungi altre immagini del prodotto se disponibili -->
+{#                <div class="row g-2">#}
+{#                    <div class="col-3">#}
+{#                        <img src="{{ product.main_image.url|default:'https://placehold.co/150x150/eee/333?text=Thumb+1' }}" class="img-thumbnail" alt="Thumbnail 1" onclick="changeImage(this.src)">#}
+{#                    </div>#}
+{#                    <div class="col-3">#}
+{#                        <img src="https://placehold.co/150x150/ddd/333?text=Thumb+2" class="img-thumbnail" alt="Thumbnail 2" onclick="changeImage(this.src)">#}
+{#                    </div>#}
+{#                    <div class="col-3">#}
+{#                        <img src="https://placehold.co/150x150/ccc/333?text=Thumb+3" class="img-thumbnail" alt="Thumbnail 3" onclick="changeImage(this.src)">#}
+{#                    </div>#}
+{#                    <div class="col-3">#}
+{#                        <img src="https://placehold.co/150x150/bbb/333?text=Thumb+4" class="img-thumbnail" alt="Thumbnail 4" onclick="changeImage(this.src)">#}
+{#                    </div>#}
+{#                </div>#}
                 <div class="row g-2">
-                    <div class="col-3">
-                        <img src="{{ product.main_image.url|default:'https://placehold.co/150x150/eee/333?text=Thumb+1' }}" class="img-thumbnail" alt="Thumbnail 1" onclick="changeImage(this.src)">
-                    </div>
-                    <div class="col-3">
-                        <img src="https://placehold.co/150x150/ddd/333?text=Thumb+2" class="img-thumbnail" alt="Thumbnail 2" onclick="changeImage(this.src)">
-                    </div>
-                    <div class="col-3">
-                        <img src="https://placehold.co/150x150/ccc/333?text=Thumb+3" class="img-thumbnail" alt="Thumbnail 3" onclick="changeImage(this.src)">
-                    </div>
-                    <div class="col-3">
-                        <img src="https://placehold.co/150x150/bbb/333?text=Thumb+4" class="img-thumbnail" alt="Thumbnail 4" onclick="changeImage(this.src)">
-                    </div>
+                    {% for image in p_images %}
+                        <div class="col-3">
+                            <img src="{{ image.url|default:'https://placehold.co/150x150/eee/333?text=Thumbnail' }}" class="img-thumbnail" alt="Thumbnail {{ forloop.counter }}" style="width: 150px; height: 150px;" onclick="changeImage(this.src)">
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
 
             <!-- Colonna Destra: Dettagli Prodotto e Azioni -->
             <div class="col-lg-6">
-                <h1 class="display-5 fw-bold">{{ product.name|default:"Nome Prodotto Esempio" }}</h1>
+                <h1 class="display-5 fw-bold">{{ product.name|default:"Product name example" }}</h1>
                 <p class="text-muted">
-                    In <a href="#">{{ product.category.name|default:"Categoria" }}</a>
+                    In <a href="#">{{ product.category.name|default:"Category" }}</a>
                 </p>
                 <p class="fs-3 fw-bold text-primary my-3">€{{ product.price|default:"99.99" }}</p>
                 <p class="lead">{{ product.short_description|default:"Breve descrizione del prodotto che ne evidenzia le caratteristiche principali in poche frasi." }}</p>
@@ -43,9 +50,14 @@
 
                 <!-- Form per Aggiungere al Carrello -->
                 {% if cart_item_ids and product.id in cart_item_ids %}
-                    <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary btn-lg w-100 mt-4">
-                        <i class="fas fa-shopping-cart me-2"></i>
-                    </a>
+{#                    <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary btn-lg w-50 mt-4 mx-auto">#}
+{#                        <i class="fas fa-shopping-cart me-2"></i>#}
+{#                    </a>#}
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary btn-lg w-75 mt-4">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                        </a>
+                    </div>
                 {% else %}
                     <form method="post" action="{% url 'cart_add' product.id %}">
                         {% csrf_token %}
@@ -61,6 +73,11 @@
                             </div>
                         </div>
                     </form>
+                {% endif %}
+                {% if product.stock == 0 %}
+                    <div class="alert alert-danger text-center mt-4 mx-auto" role="alert" style="width: 50%;">
+                        <i class="fas fa-exclamation-circle me-2"></i> This item is currently out of stock.
+                    </div>
                 {% endif %}
 
 

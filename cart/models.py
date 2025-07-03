@@ -70,7 +70,7 @@ class Cart(TimestampedModel):
         """
         Calcola il totale sommando quantity * unit_price di ogni CartItem.
         """
-        aggregate = self.items.aggregate(
+        aggregate = self.items.filter(product__stock__gt=0).aggregate(
             total=Sum(
                 F('quantity') * F('unit_price'),
                 output_field=DecimalField(max_digits=12, decimal_places=2)

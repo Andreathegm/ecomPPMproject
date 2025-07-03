@@ -8,7 +8,7 @@
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h1>Checkout</h1>
-                <p class="lead">Completa i dettagli qui sotto per finalizzare il tuo ordine.</p>
+                <p class="lead">Complete the details below to finalize your order.</p>
             </div>
         </div>
 
@@ -16,13 +16,13 @@
             <!-- Colonna Destra: Riepilogo Ordine (opzionale ma consigliato) -->
             <div class="col-md-5 col-lg-4 order-md-last">
                 <h4 class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-primary">Il tuo carrello</span>
-                    <span class="badge bg-primary rounded-pill">{{ cart.items.count|default:3 }}</span>
+                    <span class="text-primary">Purchase summary</span>
+                    <span class="badge bg-primary rounded-pill">{{ cart_items_count}}</span>
                 </h4>
                 <ul class="list-group mb-3">
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Subtotale</span>
-                        <strong>€{{ cart.total|default:"150.00" }}</strong>
+                        <span>Subtotal</span>
+                        <strong>{{cart.total}}€</strong>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
                         <span>tax</span>
@@ -30,7 +30,7 @@
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Shipping cost</span>
-                        <strong>-</strong>
+                        <strong>{{ shipping_cost }}€</strong>
                     </li>
 {#                    <li class="list-group-item d-flex justify-content-between bg-light">#}
 {#                        <div class="text-success">#}
@@ -40,8 +40,8 @@
 {#                        <span class="text-success">−€10.00</span>#}
 {#                    </li>#}
                     <li class="list-group-item d-flex justify-content-between">
-                        <span>Totale (IVA Inclusa)</span>
-                        <strong>€{{ cart.grand_total|default:"145.00" }}</strong>
+                        <span>Total</span>
+                        <strong>{{ total_amount}}€</strong>
                     </li>
                 </ul>
             </div>

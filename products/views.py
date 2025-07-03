@@ -3,16 +3,18 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, UpdateView
+from django.utils.text import slugify
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from products.forms import ProductForm, CreateImageFormSet, EditImageFormSet, CategoryForm
 from products.models import Category, Product
+from utils.search import get_filtered_products
 
 
+####### category and product views (for customer) ########
 def category_view(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
     products = Product.objects.filter(category=category, available=True)
@@ -27,8 +29,12 @@ def category_view(request, category_slug):
 
 def product_detail(request, product_slug):
     product = get_object_or_404(Product, slug=product_slug, available=True)
+    p_images = list(product.images.all())
+    images = [img.image for img in p_images]# Exclude the main image if needed
+    # Supponendo che il modello Product abbia un campo images
     context = {
         'product': product,
+        'p_images': images,
     }
     return render(request, 'products/product_detail.html', context)
 
@@ -44,6 +50,7 @@ class ProductListView(ListView):
     paginate_by = 12  # Number of products per page
 
     def get_queryset(self):
+
         qs = Product.objects.filter(available=True)
 
         # ---- Filtro per categoria ----
@@ -68,6 +75,9 @@ class ProductListView(ListView):
             qs = qs.order_by('-price')
         else:  # Default o “Più recenti”
             qs = qs.order_by('-created_at')
+
+        if self.request.GET.get('search'):
+            qs = get_filtered_products(self, qs)
 
         return qs
 
@@ -97,47 +107,45 @@ class ManageCatalogView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        """
-        Restituisce queryset filtrato per ricerca, categoria e prezzo.
-        Include anche i prodotti non disponibili per la gestione.
-        """
-        qs = Product.objects.all()  # Include anche prodotti non disponibili
+        return get_filtered_products(self)
 
-        # ---- Filtro per ricerca ----
-        search_query = self.request.GET.get('search')
-        if search_query:
-            qs = qs.filter(
-                Q(name__icontains=search_query) |
-                Q(description__icontains=search_query) |
-                Q(category__name__icontains=search_query)
-            )
-
-        # ---- Filtro per categoria ----
-        category_slug = self.request.GET.get('category')
-        if category_slug:
-            qs = qs.filter(category__slug=category_slug)
-
-        # ---- Filtro per prezzo massimo ----
-        max_price = self.request.GET.get('max_price')
-        if max_price:
-            try:
-                max_price = float(max_price)
-                qs = qs.filter(price__lte=max_price)
-            except ValueError:
-                pass
-
-        # ---- Ordinamento ----
-        order = self.request.GET.get('order')
-        if order == '1':  # Prezzo crescente
-            qs = qs.order_by('price')
-        elif order == '2':  # Prezzo decrescente
-            qs = qs.order_by('-price')
-        elif order == '3':  # Più recenti
-            qs = qs.order_by('-created_at')
-        else:  # Default
-            qs = qs.order_by('name')
-
-        return qs
+        # qs = Product.objects.all()  # Include anche prodotti non disponibili
+        #
+        # # ---- Filtro per ricerca ----
+        # search_query = self.request.GET.get('search')
+        # if search_query:
+        #     qs = qs.filter(
+        #         Q(name__icontains=search_query) |
+        #         Q(description__icontains=search_query) |
+        #         Q(category__name__icontains=search_query)
+        #     )
+        #
+        # # ---- Filtro per categoria ----
+        # category_slug = self.request.GET.get('category')
+        # if category_slug:
+        #     qs = qs.filter(category__slug=category_slug)
+        #
+        # # ---- Filtro per prezzo massimo ----
+        # max_price = self.request.GET.get('max_price')
+        # if max_price:
+        #     try:
+        #         max_price = float(max_price)
+        #         qs = qs.filter(price__lte=max_price)
+        #     except ValueError:
+        #         pass
+        #
+        # # ---- Ordinamento ----
+        # order = self.request.GET.get('order')
+        # if order == '1':  # Prezzo crescente
+        #     qs = qs.order_by('price')
+        # elif order == '2':  # Prezzo decrescente
+        #     qs = qs.order_by('-price')
+        # elif order == '3':  # Più recenti
+        #     qs = qs.order_by('-created_at')
+        # else:  # Default
+        #     qs = qs.order_by('name')
+        #
+        # return qs
 
     def get_context_data(self, **kwargs):
         """
@@ -164,89 +172,90 @@ class ManageCatalogView(ListView):
         return ctx
 
 
-############ CATEGORY MANAGEMENT VIEWS ############
+############ CATALOG VIEW ############
 
 # Aggiungi questa view al tuo views.py esistente
+#
+# @method_decorator([login_required, permission_required('products.change_product', raise_exception=True)], name='dispatch')
+# class ManageCatalogView(ListView):
+#     """
+#     View per la gestione del catalogo da parte dello store manager.
+#     Mostra categorie e prodotti con opzioni di gestione.
+#     """
+#     model = Product
+#     template_name = 'store_manager/managecatolog.html'
+#     context_object_name = 'products'
+#     paginate_by = 12
+#
+#     def get_queryset(self):
+#         """
+#         Restituisce queryset filtrato per ricerca, categoria e prezzo.
+#         Include anche i prodotti non disponibili per la gestione.
+#         """
+#         qs = Product.objects.all()  # Include anche prodotti non disponibili
+#
+#         # ---- Filtro per ricerca ----
+#         search_query = self.request.GET.get('search')
+#         if search_query:
+#             qs = qs.filter(
+#                 Q(name__icontains=search_query) |
+#                 Q(description__icontains=search_query) |
+#                 Q(category__name__icontains=search_query)
+#             )
+#
+#         # ---- Filtro per categoria ----
+#         category_slug = self.request.GET.get('category')
+#         if category_slug:
+#             qs = qs.filter(category__slug=category_slug)
+#
+#         # ---- Filtro per prezzo massimo ----
+#         max_price = self.request.GET.get('max_price')
+#         if max_price:
+#             try:
+#                 max_price = float(max_price)
+#                 qs = qs.filter(price__lte=max_price)
+#             except ValueError:
+#                 pass
+#
+#         # ---- Ordinamento ----
+#         order = self.request.GET.get('order')
+#         if order == '1':        # Prezzo crescente
+#             qs = qs.order_by('price')
+#         elif order == '2':      # Prezzo decrescente
+#             qs = qs.order_by('-price')
+#         elif order == '3':      # Più recenti
+#             qs = qs.order_by('-created_at')
+#         else:                   # Default
+#             qs = qs.order_by('name')
+#
+#         return qs
+#
+#     def get_context_data(self, **kwargs):
+#         """
+#         Aggiunge categorie e parametri di ricerca al context.
+#         """
+#         ctx = super().get_context_data(**kwargs)
+#
+#         # Lista delle categorie per il filtro laterale
+#         ctx['category_list'] = Category.objects.all()
+#
+#         # Categorie per la sezione superiore (con filtro di ricerca se applicabile)
+#         categories = Category.objects.all()
+#         search_query = self.request.GET.get('search')
+#         if search_query:
+#             categories = categories.filter(name__icontains=search_query)
+#         ctx['categories'] = categories
+#
+#         # Per ripopolare i controlli UI con i valori correnti
+#         ctx['selected_category'] = self.request.GET.get('category', '')
+#         ctx['selected_max_price'] = self.request.GET.get('max_price', '')
+#         ctx['selected_order'] = self.request.GET.get('order', '')
+#         ctx['search_query'] = search_query or ''
+#
+#         return ctx
 
-@method_decorator([login_required, permission_required('products.change_product', raise_exception=True)], name='dispatch')
-class ManageCatalogView(ListView):
-    """
-    View per la gestione del catalogo da parte dello store manager.
-    Mostra categorie e prodotti con opzioni di gestione.
-    """
-    model = Product
-    template_name = 'store_manager/managecatolog.html'
-    context_object_name = 'products'
-    paginate_by = 12
 
-    def get_queryset(self):
-        """
-        Restituisce queryset filtrato per ricerca, categoria e prezzo.
-        Include anche i prodotti non disponibili per la gestione.
-        """
-        qs = Product.objects.all()  # Include anche prodotti non disponibili
-
-        # ---- Filtro per ricerca ----
-        search_query = self.request.GET.get('search')
-        if search_query:
-            qs = qs.filter(
-                Q(name__icontains=search_query) |
-                Q(description__icontains=search_query) |
-                Q(category__name__icontains=search_query)
-            )
-
-        # ---- Filtro per categoria ----
-        category_slug = self.request.GET.get('category')
-        if category_slug:
-            qs = qs.filter(category__slug=category_slug)
-
-        # ---- Filtro per prezzo massimo ----
-        max_price = self.request.GET.get('max_price')
-        if max_price:
-            try:
-                max_price = float(max_price)
-                qs = qs.filter(price__lte=max_price)
-            except ValueError:
-                pass
-
-        # ---- Ordinamento ----
-        order = self.request.GET.get('order')
-        if order == '1':        # Prezzo crescente
-            qs = qs.order_by('price')
-        elif order == '2':      # Prezzo decrescente
-            qs = qs.order_by('-price')
-        elif order == '3':      # Più recenti
-            qs = qs.order_by('-created_at')
-        else:                   # Default
-            qs = qs.order_by('name')
-
-        return qs
-
-    def get_context_data(self, **kwargs):
-        """
-        Aggiunge categorie e parametri di ricerca al context.
-        """
-        ctx = super().get_context_data(**kwargs)
-
-        # Lista delle categorie per il filtro laterale
-        ctx['category_list'] = Category.objects.all()
-
-        # Categorie per la sezione superiore (con filtro di ricerca se applicabile)
-        categories = Category.objects.all()
-        search_query = self.request.GET.get('search')
-        if search_query:
-            categories = categories.filter(name__icontains=search_query)
-        ctx['categories'] = categories
-
-        # Per ripopolare i controlli UI con i valori correnti
-        ctx['selected_category'] = self.request.GET.get('category', '')
-        ctx['selected_max_price'] = self.request.GET.get('max_price', '')
-        ctx['selected_order'] = self.request.GET.get('order', '')
-        ctx['search_query'] = search_query or ''
-
-        return ctx
-
-
+######### PRODUCT MANAGEMENT VIEWS #########
 @permission_required('products.add_product', raise_exception=True)
 def add_product(request):
     if request.method == 'POST':
@@ -314,15 +323,18 @@ def delete_product(request, product_id):
     return redirect('manage_catalog')
 
 
+######CATEGORY MANAGEMENT VIEWS######
+
 class CategoryCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Category
     form_class = CategoryForm
     template_name = 'category/category_form.html'
     permission_required = 'products.add_category'
-    success_url = reverse_lazy('category_list')
+    success_url = reverse_lazy('manage_catalog')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Categoria "{form.instance.name}" creata con successo.')
+        form.instance.slug = slugify(form.instance.name)
+        messages.success(self.request, f'Category "{form.instance.name}" added successfully.')
         return super().form_valid(form)
 
 
@@ -334,5 +346,17 @@ class CategoryUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView
     success_url = reverse_lazy('manage_catalog')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Categoria "{form.instance.name}" aggiornata con successo.')
+        form.instance.slug = slugify(form.instance.name)
+        messages.success(self.request, f'Category "{form.instance.name}" updated successfully.')
         return super().form_valid(form)
+
+
+class CategoryDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Category
+    permission_required = 'products.delete_category'
+    success_url = reverse_lazy('manage_catalog')
+
+    def delete(self, request, *args, **kwargs):
+        category = self.get_object()
+        messages.success(request, f'Category "{category.name}" eliminated successfully.')
+        return super().delete(request, *args, **kwargs)

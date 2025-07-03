@@ -32,6 +32,11 @@ class Product(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
+    @property
+    def get_main_image(self):
+        main_image = self.images.filter(is_main=True).first()
+        return main_image.image.url if main_image else f'https://placehold.co/300x300/eee/333?text={self.name}'
+
     def __str__(self):
         return self.name
 
