@@ -11,7 +11,7 @@ from .models import Product, ProductImage, Category
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['category', 'name', 'slug', 'description', 'price', 'stock', 'available']
+        fields = ['category', 'name', 'description', 'price', 'stock', 'available']
         widgets = {
             'description': forms.Textarea(attrs={'class':'form-control', 'rows':4}),
             'price':       forms.NumberInput(attrs={'class':'form-control','step':'0.01'}),
@@ -24,8 +24,9 @@ class ProductForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['category'].empty_label = "Seleziona una categoria"
-        # Crispy layout
+        self.fields['category'].empty_label = "Select a category"
+
+    # Crispy layout
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
@@ -64,13 +65,13 @@ class ProductImageForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Se istanza esistente, popola existing_image per preview
+        self.fields['image'].required = False
+
+    # Se istanza esistente, popola existing_image per preview
         if self.instance and self.instance.pk and self.instance.image:
             self.fields['existing_image'].initial = self.instance.image.url
-            self.fields['image'].required = False
-        else:
-            self.fields['image'].required = True
 
+        self.fields['alt_text'].widget = forms.HiddenInput()
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(

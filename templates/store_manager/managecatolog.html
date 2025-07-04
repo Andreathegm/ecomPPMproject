@@ -9,25 +9,25 @@
         <div class="row text-center mb-5">
             <div class="col-12">
                 <h1>Manage Catalog</h1>
-                <p class="lead">Gestisci prodotti e categorie del tuo negozio.</p>
+                <p class="lead">Manage products and categories of your store .</p>
             </div>
         </div>
 
         <!-- Campo di Ricerca -->
         <div class="row mb-4">
             <div class="col-12">
-                <form method="get" action="{% url 'manage_catalog' %}">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="search" placeholder="Cerca categoria o prodotto..." value="{{ request.GET.search }}">
+                <form method="get" action="{% url 'manage_catalog' %}" class="d-flex justify-content-center">
+                    <div class="input-group w-50">
+                        <input type="text" class="form-control" name="search" placeholder="Search categories or products..." value="{{ request.GET.search }}">
                         <button class="btn btn-outline-secondary" type="submit">
-                            <i class="fas fa-search"></i> Cerca
+                            <i class="fas fa-search"></i> Search
                         </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row mt-5" >
             <!-- Colonna Sinistra: Filtri e Ordinamento -->
             <div class="col-lg-3">
                 <div class="card shadow-sm sticky-top" style="top: 20px;">
@@ -74,9 +74,9 @@
                 <!-- Sezione Categorie -->
                 <div class="mb-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3>Categorie</h3>
+                        <h3>Categories</h3>
                         <a href="{% url 'category_add' %}" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus"></i> Nuova Categoria
+                            <i class="fas fa-plus"></i> New category
                         </a>
                     </div>
 
@@ -90,10 +90,15 @@
                                         </h6>
                                     </div>
                                     <div class="card-body text-center">
-                                        <p class="card-text small text-muted">{{ category.description|default:"Nessuna descrizione" }}</p>
-                                        <div class="btn-group-vertical d-grid gap-2">
-                                            <a href="{% url 'category_add' %}" class="btn btn-sm btn-primary">
-                                                <i class="fas fa-eye"></i> Modify
+
+                                        <div class="position-relative">
+                                            <img src="{{category.image.url}}" class="card-img-top p-2" alt="{{ category.name }} image " style="height: 200px; object-fit: cover;">
+                                        </div>
+                                        <p class="card-text small text-muted mt-3">{{ category.description|default:"Nessuna descrizione" }}</p>
+
+                                        <div class="d-flex justify-content-center gap-3">
+                                            <a href="{% url 'category'  category.slug %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> view
                                             </a>
                                             <a href="{% url 'category_edit' category.id %}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-edit"></i> Edit
@@ -111,7 +116,7 @@
                         {% empty %}
                             <div class="col-12">
                                 <div class="alert alert-info text-center">
-                                    <i class="fas fa-info-circle"></i> Nessuna categoria trovata.
+                                    <i class="fas fa-info-circle"></i> No categories found.
                                 </div>
                             </div>
                         {% endfor %}
@@ -123,7 +128,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3>Prodotti</h3>
                         <a href="{% url 'add_product' %}" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus"></i> Nuovo Prodotto
+                            <i class="fas fa-plus"></i> New Product
                         </a>
                     </div>
 
@@ -133,12 +138,16 @@
                                 <div class="card h-100 text-center shadow-sm position-relative">
                                     <!-- Badge Stock Status -->
                                     {% if product.stock <= 5 %}
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                            Stock Basso
+                                        <span
+                                                class="position-absolute top-0 start-100 badge rounded-pill bg-danger"
+                                                style="transform: translate(-60px, -10px);"
+                                        >
+                                        Low stock
                                         </span>
                                     {% elif product.stock <= 10 %}
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">
-                                            Stock Medio
+                                        <span class="position-absolute top-0 start-100  badge rounded-pill bg-warning"
+                                              style="transform: translate(-80px, -10px);">
+                                            Medium stock
                                         </span>
                                     {% endif %}
 
@@ -147,13 +156,13 @@
                                     </div>
 
                                     <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title">{{ product.name|default:"Nome Prodotto" }}</h5>
-                                        <p class="card-text fw-bold text-primary fs-5">€{{ product.price|default:"49.99" }}</p>
+                                        <h5 class="card-title">{{ product.name|default:"Product name" }}</h5>
+                                        <p class="card-text fw-bold text-primary fs-5">{{ product.price|default:"49.99" }}€</p>
                                         <p class="card-text small text-muted">Stock: {{ product.stock|default:"N/A" }}</p>
-                                        <p class="card-text small text-muted">Categoria: {{ product.category.name|default:"Non assegnata" }}</p>
+                                        <p class="card-text small text-muted">Category: {{ product.category.name|default:"Not assigned" }}</p>
 
                                         <div class="mt-auto">
-                                            <div class="btn-group-vertical d-grid gap-2">
+                                            <div class="mt-auto justify-content-center gap-5">
                                                 <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-eye"></i> View
                                                 </a>
@@ -174,7 +183,7 @@
                         {% empty %}
                             <div class="col-12">
                                 <div class="alert alert-info text-center">
-                                    <i class="fas fa-info-circle"></i> Nessun prodotto trovato che corrisponda ai criteri di ricerca.
+                                    <i class="fas fa-info-circle"></i> No product found that matches search criteria.
                                 </div>
                             </div>
                         {% endfor %}
@@ -192,7 +201,7 @@
                                     </a>
                                 </li>
                             {% else %}
-                                <li class="page-item disabled"><span class="page-link">Precedente</span></li>
+                                <li class="page-item disabled"><span class="page-link">Previous</span></li>
                             {% endif %}
 
                             {% for i in page_obj.paginator.page_range %}
@@ -210,11 +219,11 @@
                             {% if page_obj.has_next %}
                                 <li class="page-item">
                                     <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">
-                                        Successiva
+                                        Next
                                     </a>
                                 </li>
                             {% else %}
-                                <li class="page-item disabled"><span class="page-link">Successiva</span></li>
+                                <li class="page-item disabled"><span class="page-link">Next</span></li>
                             {% endif %}
                         </ul>
                     </nav>

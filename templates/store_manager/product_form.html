@@ -1,0 +1,581 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-{% if is_edit %}edit{% else %}plus{% endif %} me-2"></i>
+                            {{ title }}
+                        </h4>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="row">
+                                <!-- Dettagli Prodotto -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                Dettagli Prodotto
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            {{ product_form|crispy }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Immagini Prodotto -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0">
+                                                <i class="fas fa-images me-2"></i>
+                                                Immagini Prodotto
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            {{ formset.management_form }}
+
+                                            <div id="formset-container">
+                                                {% for form in formset %}
+                                                    <div class="image-form-item card mb-3 border-secondary">
+                                                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                                            <h6 class="mb-0 text-secondary">
+                                                                <i class="fas fa-image me-1"></i>
+                                                                Immagine {{ forloop.counter }}
+                                                            </h6>
+                                                            {% if not forloop.first %}
+                                                                <button type="button" class="btn btn-outline-danger btn-sm remove-form">
+                                                                    <i class="fas fa-trash me-1"></i>
+                                                                    Rimuovi
+                                                                </button>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <!-- Campi nascosti per DELETE -->
+                                                            {% for hidden in form.hidden_fields %}
+                                                                {{ hidden }}
+                                                            {% endfor %}
+
+                                                            <!-- Sezione immagine con logica simile al primo form -->
+                                                            {% if form.image %}
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-bold">
+                                                                        <i class="fas fa-image me-1"></i>
+                                                                        File Immagine
+                                                                    </label>
+
+                                                                    <!-- Immagine attuale se presente -->
+                                                                    {% if form.instance.image %}
+                                                                        <div class="current-image-section mb-3">
+                                                                            <div class="card bg-light">
+                                                                                <div class="card-body p-3">
+                                                                                    <div class="d-flex align-items-start gap-3">
+                                                                                        <div class="flex-shrink-0">
+                                                                                            <img src="{{ form.instance.image.url }}"
+                                                                                                 alt="Immagine attuale"
+                                                                                                 class="img-thumbnail current-image"
+                                                                                                 style="width: 80px; height: 80px; object-fit: cover;">
+                                                                                        </div>
+                                                                                        <div class="flex-grow-1">
+                                                                                            <h6 class="mb-1 text-success">
+                                                                                                <i class="fas fa-check-circle me-1"></i>
+                                                                                                Immagine attuale
+                                                                                            </h6>
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-outline-danger btn-sm remove-current-image">
+                                                                                                <i class="fas fa-trash me-1"></i>
+                                                                                                Rimuovi
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    <!-- Widget file nascosto -->
+                                                                    <div class="django-file-widget" style="display: none;">
+                                                                        {{ form.image }}
+                                                                    </div>
+
+                                                                    <!-- File input personalizzato -->
+                                                                    <div class="custom-file-input-wrapper">
+                                                                        <div class="text-center">
+                                                                            <button type="button"
+                                                                                    class="btn btn-outline-primary custom-file-button">
+                                                                                <i class="fas fa-folder-open me-2"></i>
+                                                                                Seleziona immagine
+                                                                            </button>
+                                                                        </div>
+                                                                        <div class="form-text text-center mt-2">
+                                                                            <i class="fas fa-info-circle me-1"></i>
+                                                                            Formati supportati: JPG, PNG, GIF, WebP (max 5MB)
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Errori del campo -->
+                                                                    {% if form.image.errors %}
+                                                                        <div class="alert alert-danger">
+                                                                            {{ form.image.errors }}
+                                                                        </div>
+                                                                    {% endif %}
+
+                                                                    <!-- Area di drop -->
+                                                                    <div class="drop-zone border-2 border-dashed border-secondary rounded p-3 text-center text-muted mb-3"
+                                                                         style="{% if form.instance.image %}display: none;{% endif %}">
+                                                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                                                        <p class="mb-0">Trascina qui l'immagine o clicca per selezionarla</p>
+                                                                    </div>
+
+                                                                    <!-- Preview nuova immagine -->
+                                                                    <div class="image-preview-container" style="display: none;">
+                                                                        <div class="card border-success">
+                                                                            <div class="card-body p-3">
+                                                                                <div class="d-flex align-items-start gap-3">
+                                                                                    <div class="flex-shrink-0">
+                                                                                        <img class="image-preview img-thumbnail preview-image"
+                                                                                             style="width: 80px; height: 80px; object-fit: cover;"
+                                                                                             alt="Anteprima">
+                                                                                    </div>
+                                                                                    <div class="flex-grow-1">
+                                                                                        <h6 class="mb-1 text-success">
+                                                                                            <i class="fas fa-eye me-1"></i>
+                                                                                            Anteprima nuova immagine
+                                                                                        </h6>
+                                                                                        <p class="text-muted mb-2 small file-info">
+                                                                                            <!-- Info del file -->
+                                                                                        </p>
+                                                                                        <button type="button"
+                                                                                                class="btn btn-outline-danger btn-sm remove-preview">
+                                                                                            <i class="fas fa-trash me-1"></i>
+                                                                                            Rimuovi
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            {% endif %}
+
+                                                            <!-- Altri campi del form -->
+                                                            {% for field in form.visible_fields %}
+                                                                {% if field.name != 'image' %}
+                                                                    <div class="mb-3">
+                                                                        {{ field|as_crispy_field }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+
+                                            <div class="text-center">
+                                                <button type="button" class="btn btn-outline-success btn-sm" id="add-image">
+                                                    <i class="fas fa-plus me-2"></i>
+                                                    Aggiungi altra immagine
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottoni di azione -->
+                            <div class="d-flex gap-2 pt-3 border-top">
+                                <button type="submit" class="btn btn-success flex-fill">
+                                    <i class="fas fa-save me-1"></i>
+                                    {% if is_edit %}Salva Modifiche{% else %}Crea Prodotto{% endif %}
+                                </button>
+                                <a href="{% url 'manage_catalog' %}" class="btn btn-outline-secondary flex-fill">
+                                    <i class="fas fa-times me-1"></i>
+                                    Annulla
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .img-thumbnail {
+            border: 2px solid #dee2e6;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .img-thumbnail:hover {
+            border-color: #0d6efd;
+            transform: scale(1.05);
+        }
+
+        .current-image {
+            border-color: #198754;
+        }
+
+        .preview-image {
+            border-color: #20c997;
+        }
+
+        .card {
+            border-radius: 0.75rem;
+        }
+
+        .card-header {
+            border-radius: 0.75rem 0.75rem 0 0 !important;
+        }
+
+        .drop-zone {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+
+        .drop-zone.dragover {
+            border-color: #0d6efd;
+            background-color: #e7f3ff;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .image-form-item {
+            transition: all 0.3s ease;
+        }
+
+        .image-form-item:hover {
+            border-color: #007bff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .d-flex.gap-3 {
+                flex-direction: column;
+            }
+
+            .flex-shrink-0 {
+                align-self: center;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const formsetContainer = document.getElementById('formset-container');
+            const addButton = document.getElementById('add-image');
+            const managementFormPrefix = 'images';
+
+            let totalFormsInput = document.querySelector(`input[name="${managementFormPrefix}-TOTAL_FORMS"]`);
+            let maxFormsInput = document.querySelector(`input[name="${managementFormPrefix}-MAX_NUM_FORMS"]`);
+
+            if (!totalFormsInput) {
+                console.error('Campo TOTAL_FORMS non trovato!');
+                return;
+            }
+
+            // Funzione per formattare la dimensione del file
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Funzione per inizializzare i controlli immagine per ogni form
+            function initializeImageControls(formItem) {
+                const imageInput = formItem.querySelector('input[type="file"]');
+                const customFileButton = formItem.querySelector('.custom-file-button');
+                const previewContainer = formItem.querySelector('.image-preview-container');
+                const previewImage = formItem.querySelector('.image-preview');
+                const fileInfo = formItem.querySelector('.file-info');
+                const removePreviewBtn = formItem.querySelector('.remove-preview');
+                const removeCurrentBtn = formItem.querySelector('.remove-current-image');
+                const currentImageSection = formItem.querySelector('.current-image-section');
+                const dropZone = formItem.querySelector('.drop-zone');
+                const djangoWidget = formItem.querySelector('.django-file-widget');
+
+                if (!imageInput) return;
+
+                // Trova i checkbox originali Django
+                const originalClearCheckbox = djangoWidget.querySelector('input[type="checkbox"]');
+
+                // Funzione per mostrare l'anteprima
+                function showImagePreview(file) {
+                    if (file && file.type.startsWith('image/')) {
+                        const maxSize = 5 * 1024 * 1024; // 5MB
+                        if (file.size > maxSize) {
+                            alert('Il file è troppo grande. Dimensione massima: 5MB');
+                            clearFileInput();
+                            return;
+                        }
+
+                        // **FIX: Reset del checkbox clear quando viene selezionato un nuovo file**
+                        if (originalClearCheckbox) {
+                            originalClearCheckbox.checked = false;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            previewImage.src = e.target.result;
+                            fileInfo.innerHTML = `
+                                <strong>Nome:</strong> ${file.name}<br>
+                                <strong>Dimensione:</strong> ${formatFileSize(file.size)}<br>
+                                <strong>Tipo:</strong> ${file.type}
+                            `;
+                            previewContainer.style.display = 'block';
+                            previewContainer.classList.add('fade-in');
+                            if (dropZone) dropZone.style.display = 'none';
+
+                            // Aggiorna il bottone
+                            customFileButton.innerHTML = '<i class="fas fa-check me-2"></i>Immagine selezionata';
+                            customFileButton.classList.remove('btn-outline-primary');
+                            customFileButton.classList.add('btn-success');
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (file) {
+                        alert('Per favore seleziona un file immagine valido.');
+                        clearFileInput();
+                    }
+                }
+
+                // Funzione per pulire l'input file
+                function clearFileInput() {
+                    imageInput.value = '';
+                    previewContainer.style.display = 'none';
+                    if (dropZone) dropZone.style.display = 'block';
+
+                    // **FIX: Reset anche del checkbox clear**
+                    if (originalClearCheckbox) {
+                        originalClearCheckbox.checked = false;
+                    }
+
+                    // Ripristina il bottone
+                    customFileButton.innerHTML = '<i class="fas fa-folder-open me-2"></i>Seleziona immagine';
+                    customFileButton.classList.remove('btn-success');
+                    customFileButton.classList.add('btn-outline-primary');
+                }
+
+                // Event listeners
+                if (customFileButton) {
+                    customFileButton.addEventListener('click', function() {
+                        imageInput.click();
+                    });
+                }
+
+                imageInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        showImagePreview(file);
+                    } else {
+                        clearFileInput();
+                    }
+                });
+
+                if (removePreviewBtn) {
+                    removePreviewBtn.addEventListener('click', function() {
+                        clearFileInput();
+                    });
+                }
+
+                if (removeCurrentBtn) {
+                    removeCurrentBtn.addEventListener('click', function() {
+                        if (confirm('Sei sicuro di voler rimuovere l\'immagine attuale?')) {
+                            currentImageSection.style.display = 'none';
+                            if (dropZone) dropZone.style.display = 'block';
+
+                            // Attiva il checkbox clear
+                            if (originalClearCheckbox) {
+                                originalClearCheckbox.checked = true;
+                            }
+                        }
+                    });
+                }
+
+                // Gestione drag and drop
+                if (dropZone) {
+                    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                        dropZone.addEventListener(eventName, preventDefaults, false);
+                    });
+
+                    function preventDefaults(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+
+                    ['dragenter', 'dragover'].forEach(eventName => {
+                        dropZone.addEventListener(eventName, function() {
+                            dropZone.classList.add('dragover');
+                        }, false);
+                    });
+
+                    ['dragleave', 'drop'].forEach(eventName => {
+                        dropZone.addEventListener(eventName, function() {
+                            dropZone.classList.remove('dragover');
+                        }, false);
+                    });
+
+                    dropZone.addEventListener('drop', function(e) {
+                        const dt = e.dataTransfer;
+                        const files = dt.files;
+
+                        if (files.length > 0) {
+                            imageInput.files = files;
+                            showImagePreview(files[0]);
+                        }
+                    }, false);
+
+                    dropZone.addEventListener('click', function() {
+                        customFileButton.click();
+                    });
+                }
+            }
+
+            // Inizializza i controlli per tutti i form esistenti
+            function initializeAllImageControls() {
+                const formItems = formsetContainer.querySelectorAll('.image-form-item');
+                formItems.forEach(initializeImageControls);
+            }
+
+            // Funzione per aggiornare gli indici dei form
+            function updateFormIndex(form, newIndex) {
+                const regex = new RegExp(`(${managementFormPrefix}-)(\\d+)(-)`);
+
+                // Aggiorna header
+                const header = form.querySelector('h6');
+                if (header) {
+                    header.innerHTML = `<i class="fas fa-image me-1"></i>Immagine ${newIndex + 1}`;
+                }
+
+                // Aggiorna tutti gli elementi con name, id, for
+                form.querySelectorAll('input, select, textarea, label').forEach(element => {
+                    if (element.name) {
+                        element.name = element.name.replace(regex, `$1${newIndex}$3`);
+                    }
+                    if (element.id) {
+                        element.id = element.id.replace(regex, `$1${newIndex}$3`);
+                    }
+                    if (element.tagName === 'LABEL' && element.htmlFor) {
+                        element.htmlFor = element.htmlFor.replace(regex, `$1${newIndex}$3`);
+                    }
+                });
+            }
+
+            // Aggiungi nuovo form
+            addButton.addEventListener('click', function() {
+                const maxForms = maxFormsInput ? parseInt(maxFormsInput.value) : 10;
+                const currentFormCount = formsetContainer.querySelectorAll('.image-form-item').length;
+
+                if (currentFormCount >= maxForms) {
+                    alert('Numero massimo di immagini raggiunto!');
+                    return;
+                }
+
+                const templateForm = formsetContainer.querySelector('.image-form-item');
+                if (!templateForm) {
+                    console.error("Template form non trovato.");
+                    return;
+                }
+
+                const newForm = templateForm.cloneNode(true);
+
+                // Pulisci i campi del nuovo form
+                newForm.querySelectorAll('input, textarea').forEach(input => {
+                    if (input.type !== 'hidden') {
+                        input.value = '';
+                    }
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    }
+                });
+
+                // Rimuovi elementi esistenti
+                const currentImageSection = newForm.querySelector('.current-image-section');
+                if (currentImageSection) currentImageSection.remove();
+
+                const previewContainer = newForm.querySelector('.image-preview-container');
+                if (previewContainer) previewContainer.style.display = 'none';
+
+                const dropZone = newForm.querySelector('.drop-zone');
+                if (dropZone) dropZone.style.display = 'block';
+
+                // Aggiungi bottone rimuovi
+                const header = newForm.querySelector('.card-header');
+                if (header && !header.querySelector('.remove-form')) {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-outline-danger btn-sm remove-form';
+                    removeBtn.innerHTML = '<i class="fas fa-trash me-1"></i>Rimuovi';
+                    header.appendChild(removeBtn);
+                }
+
+                // Aggiorna indici
+                updateFormIndex(newForm, currentFormCount);
+
+                // Aggiungi al container
+                formsetContainer.appendChild(newForm);
+
+                // Aggiorna TOTAL_FORMS
+                totalFormsInput.value = currentFormCount + 1;
+
+                // Inizializza i controlli per il nuovo form
+                initializeImageControls(newForm);
+            });
+
+            // Gestione rimozione form
+            formsetContainer.addEventListener('click', function(e) {
+                const removeButton = e.target.closest('.remove-form');
+                if (removeButton) {
+                    const formToRemove = removeButton.closest('.image-form-item');
+                    const deleteInput = formToRemove.querySelector('input[name$="-DELETE"]');
+
+                    if (deleteInput) {
+                        // Form esistente: marca per cancellazione
+                        deleteInput.checked = true;
+                        formToRemove.style.display = 'none';
+                    } else {
+                        // Form nuovo: rimuovi completamente
+                        formToRemove.remove();
+                        // Aggiorna il conteggio
+                        const currentFormCount = formsetContainer.querySelectorAll('.image-form-item').length;
+                        totalFormsInput.value = currentFormCount;
+                    }
+                }
+            });
+
+            // Inizializza tutti i controlli esistenti
+            initializeAllImageControls();
+
+            console.log('Formset JavaScript con gestione immagini inizializzato.');
+        });
+    </script>
+{% endblock %}

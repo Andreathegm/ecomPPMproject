@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="container py-4">
+        <form method="post" enctype="multipart/form-data" id="product-form"
+              action="{% if is_edit %}{% url 'modify_product' product.id %}{% else %}{% url 'add_product' %}{% endif %}">
+            {% csrf_token %}
+            <div class="row justify-content-center">
+                <div class="col-lg-11 col-xl-10">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">
+                                <i class="fas fa-{% if is_edit %}edit{% else %}plus{% endif %} me-2"></i>
+                                {{ title }}
+                            </h4>
+                            {% if is_edit %}
+                                <small class="text-white-50">ID: {{ product.id }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-7">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Product Detail</h5>
+                                    {{ product_form|crispy }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-5">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Images</h5>
+                                    {{ formset.management_form }}
+
+                                    {% for form in formset %}
+                                        <div class="image-form-container mb-4 p-3 border rounded" data-form-prefix="{{ form.prefix }}">
+                                            {{ form.id }}
+                                            {{ form.DELETE.as_hidden}}
+
+                                            {% if form.instance.pk and form.instance.image %}
+                                                <div class="current-image-section mb-3">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <img src="{{ form.instance.image.url }}" alt="Immagine attuale" class="img-thumbnail"
+                                                                 style="width: 100px; height: 100px; object-fit: cover;">
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1 text-success small">
+                                                                Immagine attuale
+                                                                {% if form.instance.is_main %}
+                                                                    <span class="badge bg-warning text-dark">PRINCIPALE</span>
+                                                                {% endif %}
+                                                            </h6>
+                                                            <p class="text-muted mb-2 small">Per sostituirla, carica una nuova immagine.</p>
+                                                            <button type="button" class="btn btn-outline-danger btn-sm remove-current-image-btn">
+                                                                <i class="fas fa-trash me-1"></i> Rimuovi
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="image-upload-controls {% if form.instance.pk and form.instance.image %}d-none{% endif %}">
+                                                <div class="d-none">{{ form.image }}</div>
+
+                                                <div class="image-preview-wrapper mb-3" style="display: none;">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <img src="#" alt="Anteprima" class="img-thumbnail image-preview"
+                                                                 style="width: 100px; height: 100px; object-fit: cover;">
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1 text-info small">Nuova immagine</h6>
+                                                            <p class="text-muted mb-2 small file-info"></p>
+                                                            <button type="button" class="btn btn-outline-danger btn-sm remove-preview-btn">
+                                                                <i class="fas fa-trash me-1"></i> Annulla
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="drop-zone-wrapper">
+                                                    <div class="drop-zone text-center p-3 border-2 border-dashed rounded text-muted">
+                                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                                        <p class="mb-1">Trascina qui o</p>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary select-file-btn">
+                                                            <i class="fas fa-folder-open me-1"></i> Scegli file
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-text text-center mt-2 image-format-info">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        JPG, PNG, GIF, WebP (max 5MB)
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                {{ form.is_main|as_crispy_field }}
+                                                {{ form.alt_text|as_crispy_field }}
+                                            </div>
+
+                                            {% if form.instance.pk %}
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Immagine ID: {{ form.instance.pk }}</small>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+
+
+                                    <div class="text-center mt-3">
+                                        <button type="button" id="add-image-form-btn" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-plus me-1"></i> Add image
+                                        </button>
+                                    </div>
+                                    {# ... dopo il bottone "Aggiungi Immagine" ... #}
+
+                                    {# === INSERISCI QUESTO SNIPPET NASCOSTO QUI === #}
+                                    <div id="empty-form-template" class="d-none">
+                                        <div class="image-form-container mb-4 p-3 border rounded" data-form-prefix="{{ formset.empty_form.prefix }}">
+                                            {{ formset.empty_form.id }}
+                                            {{ formset.empty_form.DELETE.as_hidden }}
+
+                                            <div class="image-upload-controls">
+                                                <div class="d-none">{{ formset.empty_form.image }}</div>
+
+                                                <div class="image-preview-wrapper mb-3" style="display: none;">
+                                                    <div class="d-flex align-items-start gap-3">
+                                                        <div class="flex-shrink-0">
+                                                            <img src="#" alt="Anteprima" class="img-thumbnail image-preview"
+                                                                 style="width: 100px; height: 100px; object-fit: cover;">
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <h6 class="mb-1 text-info small">New image</h6>
+                                                            <p class="text-muted mb-2 small file-info"></p>
+                                                            <button type="button" class="btn btn-outline-danger btn-sm remove-preview-btn">
+                                                                <i class="fas fa-trash me-1"></i> Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="drop-zone-wrapper">
+                                                    <div class="drop-zone text-center p-3 border-2 border-dashed rounded text-muted">
+                                                        <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                                        <p class="mb-1">Trascina qui o</p>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary select-file-btn">
+                                                            <i class="fas fa-folder-open me-1"></i> Scegli file
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-text text-center mt-2 image-format-info">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        JPG, PNG, GIF, WebP (max 5MB)
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3">
+                                                {{ formset.empty_form.is_main|as_crispy_field }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {# =========================================== #}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 pt-4 mt-3 border-top">
+                        <button type="submit" form="product-form" class="btn btn-primary flex-fill">
+                            <i class="fas fa-save me-1"></i>
+                            {% if is_edit %}Salva Modifiche{% else %}Crea Prodotto{% endif %}
+                        </button>
+                        <a href="{% url 'manage_catalog' %}" class="btn btn-outline-secondary flex-fill">
+                            <i class="fas fa-times me-1"></i> Annulla
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        .border-dashed { border-style: dashed; }
+        .drop-zone { transition: all 0.3s ease; cursor: pointer; }
+        .drop-zone.dragover { border-color: #0d6efd; background-color: #f8f9fa; }
+        .img-thumbnail { border: 2px solid #dee2e6; border-radius: 0.5rem; }
+        .image-form-container.marked-for-deletion {
+            opacity: 0.5;
+            background-color: #f8f9fa;
+        }
+        .image-form-container.marked-for-deletion .current-image-section {
+            text-decoration: line-through;
+        }
+    </style>
+
+    <script>
+            document.addEventListener('DOMContentLoaded', function() {
+            // Inizializza tutti i form già presenti nella pagina
+            document.querySelectorAll('.image-form-container').forEach(container => {
+                const formPrefix = container.getAttribute('data-form-prefix');
+                console.log('Initializing form with prefix:', formPrefix);
+
+                // Elementi DOM specifici per questo form
+                const originalInput = container.querySelector(`#id_${formPrefix}-image`);
+                const uploadControls = container.querySelector('.image-upload-controls');
+                const currentImageSection = container.querySelector('.current-image-section');
+                const previewWrapper = container.querySelector('.image-preview-wrapper');
+                const previewImage = container.querySelector('.image-preview');
+                const fileInfo = container.querySelector('.file-info');
+                const dropZoneWrapper = container.querySelector('.drop-zone-wrapper');
+                const dropZone = container.querySelector('.drop-zone');
+                const selectFileBtn = container.querySelector('.select-file-btn');
+                const removePreviewBtn = container.querySelector('.remove-preview-btn');
+                const removeCurrentBtn = container.querySelector('.remove-current-image-btn');
+                const deleteCheckbox = container.querySelector(`input[name="${formPrefix}-DELETE"]`);
+
+                if (!originalInput) { return; }
+
+                function showPreview(file) {
+                    if (!file || !file.type.startsWith('image/')) {
+                        clearSelection();
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                        previewWrapper.style.display = 'block';
+                        dropZoneWrapper.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+
+                function clearSelection() {
+                    originalInput.value = '';
+                    previewWrapper.style.display = 'none';
+                    previewImage.src = '#';
+                    dropZoneWrapper.style.display = 'block';
+                }
+
+                function toggleDelete(shouldDelete) {
+                    if (deleteCheckbox) {
+                        deleteCheckbox.checked = shouldDelete;
+                        container.classList.toggle('marked-for-deletion', shouldDelete);
+                        console.log(`DELETE checkbox for ${formPrefix} set to: ${deleteCheckbox.checked}`);
+                    }
+                }
+
+                if (selectFileBtn) { selectFileBtn.addEventListener('click', (e) => { e.preventDefault(); originalInput.click(); }); }
+                if (dropZone) { dropZone.addEventListener('click', (e) => { if (!e.target.closest('button')) { e.preventDefault(); originalInput.click(); } }); }
+
+                originalInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) { showPreview(file); toggleDelete(false); }
+                });
+
+                if (removePreviewBtn) { removePreviewBtn.addEventListener('click', (e) => { e.preventDefault(); clearSelection(); }); }
+
+                if (removeCurrentBtn) {
+                    removeCurrentBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (confirm('Sei sicuro di voler rimuovere l\'immagine attuale?')) {
+                            toggleDelete(true);
+                            currentImageSection.style.display = 'none';
+                            uploadControls.classList.remove('d-none');
+                        }
+                    });
+                }
+
+                if (dropZone) {
+                    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eName => dropZone.addEventListener(eName, e => { e.preventDefault(); e.stopPropagation(); }));
+                    ['dragenter', 'dragover'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.add('dragover')));
+                    ['dragleave', 'drop'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.remove('dragover')));
+                    dropZone.addEventListener('drop', e => {
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0) {
+                            originalInput.files = files;
+                            originalInput.dispatchEvent(new Event('change'));
+                        }
+                    });
+                }
+            });
+
+            // Logica per il bottone "Aggiungi Immagine"
+            const addFormBtn = document.getElementById('add-image-form-btn');
+            const emptyFormTemplate = document.getElementById('empty-form-template');
+            const totalFormsInput = document.querySelector('input[name="images-TOTAL_FORMS"]');
+
+            addFormBtn.addEventListener('click', function() {
+            let currentFormCount = parseInt(totalFormsInput.value);
+            const newFormHtml = emptyFormTemplate.innerHTML.replace(/__prefix__/g, currentFormCount);
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFormHtml;
+            const newFormNode = tempDiv.firstElementChild;
+
+            // Inserisci il nuovo form nel DOM prima del div del bottone
+            this.parentElement.before(newFormNode);
+            totalFormsInput.value = currentFormCount + 1;
+
+            // === INIZIALIZZA IL NUOVO FORM (stessa logica di prima, applicata al nuovo nodo) ===
+            const container = newFormNode;
+            const formPrefix = container.getAttribute('data-form-prefix');
+
+            const originalInput = container.querySelector(`#id_${formPrefix}-image`);
+            const uploadControls = container.querySelector('.image-upload-controls');
+            const previewWrapper = container.querySelector('.image-preview-wrapper');
+            const previewImage = container.querySelector('.image-preview');
+            const fileInfo = container.querySelector('.file-info');
+            const dropZoneWrapper = container.querySelector('.drop-zone-wrapper');
+            const dropZone = container.querySelector('.drop-zone');
+            const selectFileBtn = container.querySelector('.select-file-btn');
+            const removePreviewBtn = container.querySelector('.remove-preview-btn');
+
+            function showPreview(file) {
+            if (!file || !file.type.startsWith('image/')) { clearSelection(); return; }
+            const reader = new FileReader();
+            reader.onload = e => {
+            previewImage.src = e.target.result;
+            fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            previewWrapper.style.display = 'block';
+            dropZoneWrapper.style.display = 'none';
+        };
+            reader.readAsDataURL(file);
+        }
+            function clearSelection() {
+            originalInput.value = '';
+            previewWrapper.style.display = 'none';
+            previewImage.src = '#';
+            dropZoneWrapper.style.display = 'block';
+        }
+
+            if (selectFileBtn) { selectFileBtn.addEventListener('click', (e) => { e.preventDefault(); originalInput.click(); }); }
+            if (dropZone) { dropZone.addEventListener('click', (e) => { if (!e.target.closest('button')) { e.preventDefault(); originalInput.click(); } }); }
+            originalInput.addEventListener('change', function() { showPreview(this.files[0]); });
+            if (removePreviewBtn) { removePreviewBtn.addEventListener('click', (e) => { e.preventDefault(); clearSelection(); }); }
+
+            if (dropZone) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eName => dropZone.addEventListener(eName, e => { e.preventDefault(); e.stopPropagation(); }));
+            ['dragenter', 'dragover'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.add('dragover')));
+            ['dragleave', 'drop'].forEach(eName => dropZone.addEventListener(eName, () => dropZone.classList.remove('dragover')));
+            dropZone.addEventListener('drop', e => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+            originalInput.files = files;
+            originalInput.dispatchEvent(new Event('change'));
+        }
+        });
+        }
+        });
+
+            // Debug: mostra lo stato dei form prima del submit
+            document.getElementById('product-form').addEventListener('submit', function(e) {
+            console.log('Form submission - checking DELETE checkboxes:');
+            document.querySelectorAll('input[name$="-DELETE"]').forEach(cb => {
+            console.log(`${cb.name}: ${cb.checked}`);
+        });
+        });
+        });
+    </script>
+{% endblock %}

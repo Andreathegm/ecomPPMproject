@@ -1,0 +1,549 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-{% if object %}edit{% else %}plus{% endif %} me-2"></i>
+                            {% if object %}Modify Category{% else %}New Category{% endif %}
+                        </h4>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- Nome categoria -->
+                            <div class="mb-3">
+                                {{ form.name|as_crispy_field }}
+                            </div>
+
+                            <!-- Descrizione -->
+                            <div class="mb-3">
+                                {{ form.description|as_crispy_field }}
+                            </div>
+
+                            <!-- Sezione immagine -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-image me-1"></i>
+                                    Category Image
+                                </label>
+
+                                <!-- Immagine attuale con controlli -->
+                                {% if object and object.image %}
+                                    <div id="current-image-section" class="mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body p-3">
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="flex-shrink-0">
+                                                        <img src="{{ object.image.url }}"
+                                                             alt="Immagine attuale di {{ object.name }}"
+                                                             class="img-thumbnail current-image"
+                                                             style="width: 120px; height: 120px; object-fit: cover;">
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1 text-success">
+                                                            <i class="fas fa-check-circle me-1"></i>
+                                                            Immagine attuale
+                                                        </h6>
+                                                        <p class="text-muted mb-2 small">
+                                                            Questa è l'immagine attualmente associata alla categoria.
+                                                        </p>
+{#                                                        <button type="button"#}
+{#                                                                class="btn btn-outline-danger btn-sm"#}
+{#                                                                id="remove-current-image">#}
+{#                                                            <i class="fas fa-trash me-1"></i>#}
+{#                                                            Rimuovi immagine#}
+{#                                                        </button>#}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Input file personalizzato -->
+                                <div class="mb-3">
+                                    <!-- Wrapper per nascondere il default widget -->
+                                    <div id="django-file-widget" style="display: none;">
+                                        {{ form.image }}
+                                    </div>
+
+                                    <!-- File input personalizzato -->
+                                    <div class="custom-file-input-wrapper">
+                                        <!-- Sezione Currently (se presente) -->
+                                        <div id="current-file-info" class="mb-2" style="display: none;">
+                                            <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded border">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-file-image text-success me-2"></i>
+                                                    <span class="small">
+                                                        <strong>Current image:</strong>
+                                                        <span id="current-file-name" class="text-muted">nessuno</span>
+                                                    </span>
+                                                </div>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="custom-clear-checkbox">
+                                                    <label class="form-check-label small text-danger" for="custom-clear-checkbox">
+                                                        Remove
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Bottone per selezionare file -->
+                                        <div class="text-center mt-3">
+                                            <button type="button"
+                                                    class="btn btn-outline-primary"
+                                                    id="custom-file-button">
+                                                <i class="fas fa-folder-open me-2"></i>
+                                                Browse file
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-text text-center mt-2">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        supported formats: JPG, PNG, GIF, WebP (max 5MB)
+                                    </div>
+                                </div>
+
+                                <!-- Errori del campo -->
+                                {% if form.image.errors %}
+                                    <div class="alert alert-danger">
+                                        {{ form.image.errors }}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Area di drop personalizzata -->
+                                <div id="drop-zone" class="border-2 border-dashed border-secondary rounded p-4 text-center text-muted mb-3" style="display: none;">
+                                    <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                    <p class="mb-0">Drag here your image or click to select it</p>
+                                </div>
+
+                                <!-- Preview nuova immagine -->
+                                <div id="image-preview-container" style="display: none;">
+                                    <div class="card border-success">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-start gap-3">
+                                                <div class="flex-shrink-0">
+                                                    <img id="image-preview"
+                                                         src="#"
+                                                         alt="Anteprima immagine"
+                                                         class="img-thumbnail preview-image"
+                                                         style="width: 120px; height: 120px; object-fit: cover;">
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1 text-success">
+                                                        <i class="fas fa-eye me-1"></i>
+                                                        Anteprima nuova immagine
+                                                    </h6>
+                                                    <p class="text-muted mb-2 small" id="file-info">
+                                                        <!-- Info del file -->
+                                                    </p>
+                                                    <button type="button"
+                                                            class="btn btn-outline-danger btn-sm"
+                                                            id="remove-preview">
+                                                        <i class="fas fa-trash me-1"></i>
+                                                        Remove image
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottoni di azione -->
+                            <div class="d-flex gap-2 pt-3 border-top">
+                                <button type="submit" class="btn btn-success flex-fill">
+                                    <i class="fas fa-save me-1"></i>
+                                    {% if object %}Save changes{% else %}Crete category{% endif %}
+                                </button>
+                                <a href="{% url 'manage_catalog' %}" class="btn btn-outline-secondary flex-fill">
+                                    <i class="fas fa-times me-1"></i>
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .img-thumbnail {
+            border: 2px solid #dee2e6;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .img-thumbnail:hover {
+            border-color: #0d6efd;
+            transform: scale(1.05);
+        }
+
+        .current-image {
+            border-color: #198754;
+        }
+
+        .preview-image {
+            border-color: #20c997;
+        }
+
+        .card {
+            border-radius: 0.75rem;
+        }
+
+        .card-header {
+            border-radius: 0.75rem 0.75rem 0 0 !important;
+        }
+
+        #drop-zone {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        #drop-zone:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+
+        #drop-zone.dragover {
+            border-color: #0d6efd;
+            background-color: #e7f3ff;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .custom-file-input-wrapper {
+            position: relative;
+        }
+
+        .custom-file-input-wrapper .btn {
+            min-width: 150px;
+        }
+
+        .form-check-input:checked {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .current-file-info {
+            transition: all 0.3s ease;
+        }
+
+        .current-file-info.removing {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .btn {
+            border-radius: 0.5rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .d-flex.gap-3 {
+                flex-direction: column;
+            }
+
+            .flex-shrink-0 {
+                align-self: center;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+            const previewContainer = document.getElementById('image-preview-container');
+            const previewImage = document.getElementById('image-preview');
+            const fileInfo = document.getElementById('file-info');
+            const removePreviewBtn = document.getElementById('remove-preview');
+            const removeCurrentBtn = document.getElementById('remove-current-image');
+            const currentImageSection = document.getElementById('current-image-section');
+            const dropZone = document.getElementById('drop-zone');
+
+            // Elementi personalizzati
+            const customFileButton = document.getElementById('custom-file-button');
+            const customClearCheckbox = document.getElementById('custom-clear-checkbox');
+            const currentFileInfo = document.getElementById('current-file-info');
+            const currentFileName = document.getElementById('current-file-name');
+
+            // Variabile per tracciare se l'immagine corrente è stata rimossa
+            let currentImageRemoved = false;
+
+            // Inizializza il widget personalizzato
+            function initializeCustomFileWidget() {
+                // Trova il widget Django originale
+                const djangoWidget = document.getElementById('django-file-widget');
+                const originalInput = djangoWidget.querySelector('input[type="file"]');
+                const originalClearCheckbox = djangoWidget.querySelector('input[type="checkbox"]');
+                const currentLink = djangoWidget.querySelector('a');
+
+                // Se c'è un file corrente, mostra le informazioni
+                if (currentLink) {
+                    currentFileInfo.style.display = 'block';
+                    currentFileName.textContent = currentLink.textContent;
+
+                    // Sincronizza il checkbox personalizzato con quello originale
+                    customClearCheckbox.addEventListener('change', function() {
+                        originalClearCheckbox.checked = this.checked;
+
+                        // Aggiorna l'aspetto visivo
+                        const fileInfoDiv = currentFileInfo.querySelector('.bg-light');
+                        if (this.checked) {
+                            fileInfoDiv.classList.add('removing');
+                            currentFileName.innerHTML = '<s>' + currentFileName.textContent + '</s>';
+                        } else {
+                            fileInfoDiv.classList.remove('removing');
+                            currentFileName.innerHTML = currentFileName.textContent.replace(/<\/?s>/g, '');
+                        }
+                    });
+                }
+
+                // Collega il bottone personalizzato all'input originale
+                customFileButton.addEventListener('click', function() {
+                    originalInput.click();
+                });
+
+                // Sostituisci l'input originale con il nostro handler
+                originalInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        showImagePreview(file);
+                        // Aggiorna il testo del bottone
+                        customFileButton.innerHTML = '<i class="fas fa-check me-2"></i>File selezionato';
+                        customFileButton.classList.remove('btn-outline-primary');
+                        customFileButton.classList.add('btn-success');
+                    } else {
+                        clearFileInput();
+                    }
+                });
+            }
+
+            // Funzione per formattare la dimensione del file
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Funzione per mostrare l'anteprima
+            {#function showImagePreview(file) {#}
+            {#    if (file && file.type.startsWith('image/')) {#}
+            {#        const maxSize = 5 * 1024 * 1024; // 5MB#}
+            {#        if (file.size > maxSize) {#}
+            {#            alert('Il file è troppo grande. Dimensione massima: 5MB');#}
+            {#            clearFileInput();#}
+            {#            return;#}
+            {#        }#}
+            {##}
+            {#        const reader = new FileReader();#}
+            {#        reader.onload = function(e) {#}
+            {#            previewImage.src = e.target.result;#}
+            {#            fileInfo.innerHTML = `#}
+            {#                <strong>Nome:</strong> ${file.name}<br>#}
+            {#                <strong>Dimensione:</strong> ${formatFileSize(file.size)}<br>#}
+            {#                <strong>Tipo:</strong> ${file.type}#}
+            {#            `;#}
+            {#            previewContainer.style.display = 'block';#}
+            {#            previewContainer.classList.add('fade-in');#}
+            {#            dropZone.style.display = 'none';#}
+            {#        };#}
+            {#        reader.readAsDataURL(file);#}
+            {#    } else if (file) {#}
+            {#        alert('Per favore seleziona un file immagine valido (JPG, PNG, GIF, WebP).');#}
+            {#        clearFileInput();#}
+            {#    }#}
+            //}
+
+            // Funzione per pulire l'input file
+            {#function clearFileInput() {#}
+            {#    imageInput.value = '';#}
+            {#    previewContainer.style.display = 'none';#}
+            {#    dropZone.style.display = 'block';#}
+            {##}
+            {#    // Ripristina il bottone#}
+            {#    customFileButton.innerHTML = '<i class="fas fa-folder-open me-2"></i>Browse file';#}
+            {#    customFileButton.classList.remove('btn-success');#}
+            {#    customFileButton.classList.add('btn-outline-primary');#}
+            //}
+
+            // Sostituisci la funzione showImagePreview esistente con questa versione modificata:
+
+            function showImagePreview(file) {
+                if (file && file.type.startsWith('image/')) {
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+                    if (file.size > maxSize) {
+                        alert('Il file è troppo grande. Dimensione massima: 5MB');
+                        clearFileInput();
+                        return;
+                    }
+
+                    // **FIX: Reset del checkbox clear quando viene selezionato un nuovo file**
+                    const originalClearCheckbox = document.getElementById('django-file-widget').querySelector('input[type="checkbox"]');
+                    if (originalClearCheckbox) {
+                        originalClearCheckbox.checked = false;
+                    }
+                    if (customClearCheckbox) {
+                        customClearCheckbox.checked = false;
+                        // Rimuovi l'aspetto visivo di "rimozione"
+                        const fileInfoDiv = currentFileInfo.querySelector('.bg-light');
+                        if (fileInfoDiv) {
+                            fileInfoDiv.classList.remove('removing');
+                        }
+                        if (currentFileName) {
+                            currentFileName.innerHTML = currentFileName.textContent.replace(/<\/?s>/g, '');
+                        }
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        fileInfo.innerHTML = `
+                <strong>Nome:</strong> ${file.name}<br>
+                <strong>Dimensione:</strong> ${formatFileSize(file.size)}<br>
+                <strong>Tipo:</strong> ${file.type}
+            `;
+                        previewContainer.style.display = 'block';
+                        previewContainer.classList.add('fade-in');
+                        dropZone.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file) {
+                    alert('Per favore seleziona un file immagine valido (JPG, PNG, GIF, WebP).');
+                    clearFileInput();
+                }
+            }
+
+// Aggiungi anche questa modifica alla funzione clearFileInput per completezza:
+
+            function clearFileInput() {
+                imageInput.value = '';
+                previewContainer.style.display = 'none';
+                dropZone.style.display = 'block';
+
+                // **FIX: Reset anche del checkbox clear quando viene pulito l'input**
+                const originalClearCheckbox = document.getElementById('django-file-widget').querySelector('input[type="checkbox"]');
+                if (originalClearCheckbox) {
+                    originalClearCheckbox.checked = false;
+                }
+                if (customClearCheckbox) {
+                    customClearCheckbox.checked = false;
+                    // Rimuovi l'aspetto visivo di "rimozione"
+                    const fileInfoDiv = currentFileInfo.querySelector('.bg-light');
+                    if (fileInfoDiv) {
+                        fileInfoDiv.classList.remove('removing');
+                    }
+                    if (currentFileName) {
+                        currentFileName.innerHTML = currentFileName.textContent.replace(/<\/?s>/g, '');
+                    }
+                }
+
+                // Ripristina il bottone
+                customFileButton.innerHTML = '<i class="fas fa-folder-open me-2"></i>Browse file';
+                customFileButton.classList.remove('btn-success');
+                customFileButton.classList.add('btn-outline-primary');
+            }
+
+            // Rimuovi anteprima
+            if (removePreviewBtn) {
+                removePreviewBtn.addEventListener('click', function() {
+                    clearFileInput();
+                });
+            }
+
+            // Rimuovi immagine corrente
+            if (removeCurrentBtn) {
+                removeCurrentBtn.addEventListener('click', function() {
+                    if (confirm('Sei sicuro di voler rimuovere l\'immagine attuale?')) {
+                        currentImageSection.style.display = 'none';
+                        currentImageRemoved = true;
+                        dropZone.style.display = 'block';
+
+                        // Aggiungi campo hidden per segnalare la rimozione
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = '{{ form.image.name }}-clear';
+                        hiddenInput.value = 'on';
+                        hiddenInput.id = 'remove-current-flag';
+                        imageInput.parentNode.appendChild(hiddenInput);
+                    }
+                });
+            }
+
+            // Gestione drag and drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropZone.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                dropZone.classList.remove('dragover');
+            }
+
+            dropZone.addEventListener('drop', handleDrop, false);
+            dropZone.addEventListener('click', function() {
+                customFileButton.click();
+            });
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    const originalInput = document.getElementById('django-file-widget').querySelector('input[type="file"]');
+                    originalInput.files = files;
+                    showImagePreview(files[0]);
+
+                    // Aggiorna il bottone
+                    customFileButton.innerHTML = '<i class="fas fa-check me-2"></i>Selected file';
+                    customFileButton.classList.remove('btn-outline-primary');
+                    customFileButton.classList.add('btn-success');
+                }
+            }
+
+            // Mostra drop zone se non c'è immagine corrente o se è stata rimossa
+            {% if not object or not object.image %}
+                dropZone.style.display = 'block';
+            {% endif %}
+
+            // Inizializza il widget personalizzato
+            initializeCustomFileWidget();
+        });
+    </script>
+{% endblock %}
