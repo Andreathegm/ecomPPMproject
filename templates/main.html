@@ -6,18 +6,26 @@
 {% block content %}
 
     <!-- 1. Hero Section -->
-    <section class="hero-section text-center py-5" style="background: url('https://placehold.co/1920x600/333/FFF?text=') no-repeat center center; background-size: cover; color: white;">
+    <section class="hero-section text-center py-5 mt-3" style="background: url(static/images/bannerapp.jpeg) no-repeat center center; background-size: cover; color: black; border-radius: 15px">
         <div class="container py-5">
-            <h1 class="display-4 fw-bold">Welcome to ShopEasy</h1>
+            <h1 class="display-4 fw-bold">Welcome to ShopFrontier</h1>
             <p class="lead col-lg-8 mx-auto">Your one-stop shop for everything you need. Quality products, unbeatable prices.</p>
-            <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg mt-3">Shop Now</a>
+            <a href="{% url 'product_list' %}"
+               class="btn btn-dark-modern mt-3">
+                Shop Now
+                <i class="fa-solid fa-arrow-right btn-dark-modern__arrow"></i>
+            </a>
+
         </div>
     </section>
 
     <!-- 2. Featured Categories -->
-    <section class="py-5">
+    <section class="py-5 mt-4">
+        <div class="container">
+            <h2 class="text-center mb-4">Explore Our Categories</h2>
+        </div>
         <div class="position-relative">
-            <div class="carousel-viewport">
+            <div class="carousel-viewport" style="padding-bottom: 17px">
                 <div class="d-flex flex-nowrap" id="categoryTrack">
                     {% for category in categories %}
                         <a href="{% url 'category' category.slug %}">
@@ -164,6 +172,53 @@
 
 
     <style>
+        /* CSS */
+        .btn-dark-modern {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #f0f0f0;
+            background: linear-gradient(135deg, #1f1f1f, #3a3a3a);
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.5);
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+        }
+
+        .btn-dark-modern:hover {
+            background: linear-gradient(135deg, #292929, #4a4a4a);
+            transform: translateY(-3px);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.6);
+            color: #fff;               /* ← qui */
+
+        }
+
+        .btn-dark-modern:active {
+            background: linear-gradient(135deg, #232323, #3e3e3e);
+            transform: translateY(-1px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-dark-modern__arrow {
+            display: inline-block;
+            transition: margin-left 0.2s ease, color 0.2s ease;
+            color: #f0f0f0;
+        }
+
+        .btn-dark-modern:hover .btn-dark-modern__arrow {
+            margin-left: 0.1rem;
+            color: #ffffff;
+        }
+
+
+        .btn-modern:hover .btn-modern__arrow {
+            margin-left: 0.1rem;
+        }
+
         a {
             text-decoration: none;
         }
