@@ -16,38 +16,35 @@
 
     <!-- 2. Featured Categories -->
     <section class="py-5">
-        <div class="container position-relative">
-            <h2 class="text-center mb-4">Shop by Category</h2>
-            <div class="d-flex align-items-center position-relative">
-                <!-- Left Arrow -->
-                <button class="btn btn-outline-dark rounded-circle p-2 shadow d-none d-md-flex align-items-center justify-content-center" style="z-index: 10; margin-right: 20px;" aria-label="Previous" onclick="scrollCategories('left')">
-                    <i class="bi bi-arrow-left"></i>
-                </button>
-
-                <!-- Scrollable Category Container -->
-                <div class="category-scroll-container d-flex flex-nowrap">
+        <div class="position-relative">
+            <div class="carousel-viewport">
+                <div class="d-flex flex-nowrap" id="categoryTrack">
                     {% for category in categories %}
-                        <div class="flex-shrink-0" style="min-width: 300px;">
-                            <div class="card h-100 text-center shadow-sm">
-                                {% if category.image %}
-                                    <img src="{{ category.image.url }}" class="card-img-top" alt="{{ category.name }} Image" style="height: 200px; object-fit: cover;">
-                                {% else %}
-                                    <img src="https://placehold.co/300x200/ccc/333?text=No+Image" class="card-img-top" alt="Category Image">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ category.description }}</h5>
-                                    <a href="{% url 'category' category.slug %}" class="btn btn-outline-dark mt-2">Browse</a>
+                        <a href="{% url 'category' category.slug %}">
+                            <div class="flex-shrink-0 me-3" style="min-width: 300px; max-width: 355px; height: 290px">
+                                <div class="card h-100 text-center shadow-sm">
+                                    {% if category.image %}
+                                        <img src="{{ category.image.url }}" class="card-img-top"
+                                             alt="{{ category.name }} Image"
+                                             style="height: 200px; object-fit: cover;">
+                                    {% else %}
+                                        <img src="https://placehold.co/300x200/ccc/333?text=No+Image"
+                                             class="card-img-top" alt="Category Image">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ category.description }}</h5>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     {% endfor %}
                 </div>
-
-                <!-- Right Arrow -->
-                <button class="btn btn-outline-dark rounded-circle p-2 shadow d-none d-md-flex align-items-center justify-content-center" style="z-index: 10; margin-left: 20px;" aria-label="Next" onclick="scrollCategories('right')">
-                    <i class="bi bi-arrow-right"></i>
-                </button>
             </div>
+
+            <button id="toggleAnimation" class="btn btn-light rounded-circle shadow position-absolute"
+                    style="top: -50px; right: 0;" aria-label="Toggle Animation">
+                <i class="bi bi-pause-fill fs-4" id="animationIcon"></i>
+            </button>
         </div>
     </section>
     <!-- 3. Featured Products -->
@@ -165,4 +162,140 @@
         </div>
     </section>
 
+
+    <style>
+        a {
+            text-decoration: none;
+        }
+
+
+        .carousel-viewport {
+            overflow: hidden; /* FONDAMENTALE: nasconde tutto ciò che esce */
+            padding-top: 17px; /* Spostiamo qui il padding che avevi prima */
+        }
+
+        #categoryTrack {
+            /* Questo elemento verrà spostato da JavaScript.
+               'will-change' è un'ottimizzazione per il browser. */
+            will-change: transform;
+        }
+
+        a {
+            text-decoration: none;
+        }
+        .card {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            z-index: 1;
+        }
+    </style>
+
 {% endblock content %}
+
+{% block footer_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const viewport = document.querySelector('.carousel-viewport');
+            const track = document.getElementById('categoryTrack');
+
+            if (!track || track.children.length === 0) return;
+
+            const toggleBtn = document.getElementById('toggleAnimation');
+            const icon = document.getElementById('animationIcon');
+
+            // --- SETUP INIZIALE E CLONAZIONE ---
+            const originalItems = Array.from(track.children);
+            const viewportWidth = viewport.offsetWidth;
+            let currentTrackWidth = track.scrollWidth;
+
+            while (currentTrackWidth < viewportWidth * 2) {
+                originalItems.forEach(item => {
+                    track.appendChild(item.cloneNode(true));
+                });
+                currentTrackWidth = track.scrollWidth;
+            }
+
+            // --- VARIABILI DI STATO ---
+            let isPaused = false;
+            let isHovering = false;
+            let isInteracting = false; // Nuovo: vero se l'utente sta scrollando
+            let interactionTimeout;
+            let animationFrameId;
+            let currentPosition = 0;
+            const speed = 0.5;
+            const loopPoint = track.scrollWidth / (track.children.length / originalItems.length);
+
+            // --- NUOVO: GESTIONE DELLO SCROLL MANUALE (TOUCHPAD/MOUSE) ---
+            viewport.addEventListener('wheel', (event) => {
+                // Previene lo scroll verticale della pagina mentre si scrolla orizzontalmente
+                if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+                    event.preventDefault();
+                }
+
+                isInteracting = true; // L'utente sta interagendo
+                currentPosition -= event.deltaX; // Aggiorna la posizione con il valore dello scroll
+
+                // Limita lo scroll per non creare spazi vuoti
+                const maxScroll = track.scrollWidth - viewportWidth;
+                if (currentPosition > 0) {
+                    currentPosition = 0;
+                }
+                if (currentPosition < -maxScroll) {
+                    currentPosition = -maxScroll;
+                }
+                track.style.transform = `translateX(${currentPosition}px)`;
+
+                // Fa ripartire l'animazione dopo un breve periodo di inattività
+                clearTimeout(interactionTimeout);
+                interactionTimeout = setTimeout(() => {
+                    isInteracting = false;
+                }, 150); // 150ms di attesa
+            });
+
+
+            // --- FUNZIONE DI ANIMAZIONE ---
+            const animate = () => {
+                // L'animazione parte solo se non è in pausa e l'utente non sta interagendo
+                if (!isPaused && !isHovering && !isInteracting) {
+                    currentPosition -= speed;
+                    if (Math.abs(currentPosition) >= loopPoint) {
+                        currentPosition += loopPoint;
+                    }
+                    track.style.transform = `translateX(${currentPosition}px)`;
+                }
+
+                animationFrameId = requestAnimationFrame(animate);
+            };
+
+            // --- GESTORI DI EVENTI ESISTENTI ---
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    isPaused = !isPaused;
+                    if (icon) {
+                        icon.className = isPaused ? 'bi bi-play-fill fs-4' : 'bi bi-pause-fill fs-4';
+                    }
+                });
+            }
+
+            // Usiamo isInteracting anche per il mouse-hover per una logica più pulita
+            viewport.addEventListener('mouseenter', () => { isHovering = true; });
+            viewport.addEventListener('mouseleave', () => { isHovering = false; });
+
+            // Avvia l'animazione
+            animate();
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+{% endblock footer_js %}
