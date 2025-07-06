@@ -34,13 +34,15 @@
                                     {% if category.image %}
                                         <img src="{{ category.image.url }}" class="card-img-top"
                                              alt="{{ category.name }} Image"
-                                             style="height: 200px; object-fit: cover;">
+                                             style="height: 175px; object-fit: cover;">
                                     {% else %}
                                         <img src="https://placehold.co/300x200/ccc/333?text=No+Image"
                                              class="card-img-top" alt="Category Image">
                                     {% endif %}
                                     <div class="card-body">
-                                        <h5 class="card-title">{{ category.description }}</h5>
+
+                                        <h5 class="card-title">{{ category.name }}</h5>
+                                        <p class="card-text">{{ category.description|truncatewords:20 }}</p>
                                     </div>
                                 </div>
                             </div>

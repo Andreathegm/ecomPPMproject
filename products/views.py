@@ -91,6 +91,10 @@ class ProductListView(ListView):
         ctx['selected_max_price'] = self.request.GET.get('max_price', '')
         ctx['selected_order'] = self.request.GET.get('order', '')
 
+        params = self.request.GET.copy()
+        params.pop('page', None)
+        ctx['get_params'] = params.urlencode()
+
         return ctx
 
 
@@ -108,44 +112,6 @@ class ManageCatalogView(ListView):
 
     def get_queryset(self):
         return get_filtered_products(self)
-
-        # qs = Product.objects.all()  # Include anche prodotti non disponibili
-        #
-        # # ---- Filtro per ricerca ----
-        # search_query = self.request.GET.get('search')
-        # if search_query:
-        #     qs = qs.filter(
-        #         Q(name__icontains=search_query) |
-        #         Q(description__icontains=search_query) |
-        #         Q(category__name__icontains=search_query)
-        #     )
-        #
-        # # ---- Filtro per categoria ----
-        # category_slug = self.request.GET.get('category')
-        # if category_slug:
-        #     qs = qs.filter(category__slug=category_slug)
-        #
-        # # ---- Filtro per prezzo massimo ----
-        # max_price = self.request.GET.get('max_price')
-        # if max_price:
-        #     try:
-        #         max_price = float(max_price)
-        #         qs = qs.filter(price__lte=max_price)
-        #     except ValueError:
-        #         pass
-        #
-        # # ---- Ordinamento ----
-        # order = self.request.GET.get('order')
-        # if order == '1':  # Prezzo crescente
-        #     qs = qs.order_by('price')
-        # elif order == '2':  # Prezzo decrescente
-        #     qs = qs.order_by('-price')
-        # elif order == '3':  # Più recenti
-        #     qs = qs.order_by('-created_at')
-        # else:  # Default
-        #     qs = qs.order_by('name')
-        #
-        # return qs
 
     def get_context_data(self, **kwargs):
         """
@@ -170,89 +136,6 @@ class ManageCatalogView(ListView):
         ctx['search_query'] = search_query or ''
 
         return ctx
-
-
-############ CATALOG VIEW ############
-
-# Aggiungi questa view al tuo views.py esistente
-#
-# @method_decorator([login_required, permission_required('products.change_product', raise_exception=True)], name='dispatch')
-# class ManageCatalogView(ListView):
-#     """
-#     View per la gestione del catalogo da parte dello store manager.
-#     Mostra categorie e prodotti con opzioni di gestione.
-#     """
-#     model = Product
-#     template_name = 'store_manager/managecatolog.html'
-#     context_object_name = 'products'
-#     paginate_by = 12
-#
-#     def get_queryset(self):
-#         """
-#         Restituisce queryset filtrato per ricerca, categoria e prezzo.
-#         Include anche i prodotti non disponibili per la gestione.
-#         """
-#         qs = Product.objects.all()  # Include anche prodotti non disponibili
-#
-#         # ---- Filtro per ricerca ----
-#         search_query = self.request.GET.get('search')
-#         if search_query:
-#             qs = qs.filter(
-#                 Q(name__icontains=search_query) |
-#                 Q(description__icontains=search_query) |
-#                 Q(category__name__icontains=search_query)
-#             )
-#
-#         # ---- Filtro per categoria ----
-#         category_slug = self.request.GET.get('category')
-#         if category_slug:
-#             qs = qs.filter(category__slug=category_slug)
-#
-#         # ---- Filtro per prezzo massimo ----
-#         max_price = self.request.GET.get('max_price')
-#         if max_price:
-#             try:
-#                 max_price = float(max_price)
-#                 qs = qs.filter(price__lte=max_price)
-#             except ValueError:
-#                 pass
-#
-#         # ---- Ordinamento ----
-#         order = self.request.GET.get('order')
-#         if order == '1':        # Prezzo crescente
-#             qs = qs.order_by('price')
-#         elif order == '2':      # Prezzo decrescente
-#             qs = qs.order_by('-price')
-#         elif order == '3':      # Più recenti
-#             qs = qs.order_by('-created_at')
-#         else:                   # Default
-#             qs = qs.order_by('name')
-#
-#         return qs
-#
-#     def get_context_data(self, **kwargs):
-#         """
-#         Aggiunge categorie e parametri di ricerca al context.
-#         """
-#         ctx = super().get_context_data(**kwargs)
-#
-#         # Lista delle categorie per il filtro laterale
-#         ctx['category_list'] = Category.objects.all()
-#
-#         # Categorie per la sezione superiore (con filtro di ricerca se applicabile)
-#         categories = Category.objects.all()
-#         search_query = self.request.GET.get('search')
-#         if search_query:
-#             categories = categories.filter(name__icontains=search_query)
-#         ctx['categories'] = categories
-#
-#         # Per ripopolare i controlli UI con i valori correnti
-#         ctx['selected_category'] = self.request.GET.get('category', '')
-#         ctx['selected_max_price'] = self.request.GET.get('max_price', '')
-#         ctx['selected_order'] = self.request.GET.get('order', '')
-#         ctx['search_query'] = search_query or ''
-#
-#         return ctx
 
 
 ######### PRODUCT MANAGEMENT VIEWS #########

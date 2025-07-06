@@ -345,48 +345,6 @@
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
 
-            // Funzione per mostrare l'anteprima
-            {#function showImagePreview(file) {#}
-            {#    if (file && file.type.startsWith('image/')) {#}
-            {#        const maxSize = 5 * 1024 * 1024; // 5MB#}
-            {#        if (file.size > maxSize) {#}
-            {#            alert('Il file è troppo grande. Dimensione massima: 5MB');#}
-            {#            clearFileInput();#}
-            {#            return;#}
-            {#        }#}
-            {##}
-            {#        const reader = new FileReader();#}
-            {#        reader.onload = function(e) {#}
-            {#            previewImage.src = e.target.result;#}
-            {#            fileInfo.innerHTML = `#}
-            {#                <strong>Nome:</strong> ${file.name}<br>#}
-            {#                <strong>Dimensione:</strong> ${formatFileSize(file.size)}<br>#}
-            {#                <strong>Tipo:</strong> ${file.type}#}
-            {#            `;#}
-            {#            previewContainer.style.display = 'block';#}
-            {#            previewContainer.classList.add('fade-in');#}
-            {#            dropZone.style.display = 'none';#}
-            {#        };#}
-            {#        reader.readAsDataURL(file);#}
-            {#    } else if (file) {#}
-            {#        alert('Per favore seleziona un file immagine valido (JPG, PNG, GIF, WebP).');#}
-            {#        clearFileInput();#}
-            {#    }#}
-            //}
-
-            // Funzione per pulire l'input file
-            {#function clearFileInput() {#}
-            {#    imageInput.value = '';#}
-            {#    previewContainer.style.display = 'none';#}
-            {#    dropZone.style.display = 'block';#}
-            {##}
-            {#    // Ripristina il bottone#}
-            {#    customFileButton.innerHTML = '<i class="fas fa-folder-open me-2"></i>Browse file';#}
-            {#    customFileButton.classList.remove('btn-success');#}
-            {#    customFileButton.classList.add('btn-outline-primary');#}
-            //}
-
-            // Sostituisci la funzione showImagePreview esistente con questa versione modificata:
 
             function showImagePreview(file) {
                 if (file && file.type.startsWith('image/')) {

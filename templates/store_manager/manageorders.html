@@ -7,19 +7,6 @@
 {% block content %}
     <div class="container my-5">
         <h1 class="mb-4">Manage Orders</h1>
-
-        {# considering moving this to base.html          #}
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
-
         {% if orders %}
             <div class="accordion" id="orderAdminAccordion">
                 {% for order in orders %}
@@ -29,7 +16,7 @@
                                     data-bs-target="#collapse-{{ order.id }}" aria-expanded="false"
                                     aria-controls="collapse-{{ order.id }}">
                                 <div class="w-100 d-flex justify-content-between align-items-center pe-3">
-                                    <span><strong>Ordine #{{ order.id }}</strong></span>
+                                    <span><strong>Order #{{ order.id }}</strong></span>
                                     <span class="d-none d-md-block text-muted">{{ order.created_at|date:"d M Y" }}</span>
                                     <span class="badge bg-info text-dark">{{ order.get_status_display }}</span>
                                     <span><strong>€{{ order.total_amount }}</strong></span>
@@ -40,19 +27,32 @@
                              aria-labelledby="heading-{{ order.id }}" data-bs-parent="#orderAdminAccordion">
                             <div class="accordion-body">
 
-                                <h6>Products:</h6>
+                                <h5>Products:</h5>
                                 <ul class="list-group list-group-flush mb-3">
                                     {% for item in order.order_items.all %}
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <div>
+                                                <img src="{{ item.product.get_main_image }}" alt="{{ item.product.name }}"
+                                                     class="img-thumbnail me-2" style="width: 60px; height: 60px;">
                                                 {{ item.product.name }} (x{{ item.quantity }})
                                             </div>
                                             <span class="text-muted">€{{ item.total_price }}</span>
                                         </li>
+
                                     {% endfor %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        tax
+                                        <span class="text-muted">€{{ order.tax_amount }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        shipping fee
+                                        <span class="text-muted">€{{ order.shipping_cost }}</span>
+                                    </li>
                                 </ul>
 
-                                <h6>Dati Spedizione:</h6>
+                                <hr>
+
+                                <h5 class="mt-4">Shipping Data:</h5>
                                 <p class="mb-1"><strong>Name:</strong> {{ order.shipping_name }}</p>
                                 <p class="mb-1"><strong>Email:</strong> {{ order.shipping_email }}</p>
                                 <p class="mb-1"><strong>Address:</strong> {{ order.shipping_address }}, {{ order.shipping_city }} ({{ order.shipping_postal_code }})</p>
@@ -91,5 +91,5 @@
     </div>
 {% endblock %}
 {% block footer_js %}
-        <script src="{% static 'js/myscript.js' %}"></script>
+{#        <script src="{% static 'js/myscript.js' %}"></script>#}
 {% endblock footer_js %}
