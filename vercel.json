@@ -1,0 +1,23 @@
+{
+  "builds": [
+    {
+      "src": "ecommerce_core/ecommerce_core/wsgi.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "15mb", "runtime": "python3.12.11" }
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "ecommerce_core/ecommerce_core/wsgi.py"
+    }
+  ]
+}

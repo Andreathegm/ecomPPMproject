@@ -21,3 +21,4 @@ requirements_all.txt
 db.sqlite3
 # Ignore media files
 media/
+/staticfiles/
