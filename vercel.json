@@ -3,11 +3,11 @@
     {
       "src": "ecommerce_core/ecommerce_core/wsgi.py",
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb", "runtime": "python3.12.11" }
-    },
-    {
-      "src": "static/**",
-      "use": "@vercel/static"
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.12.11",
+        "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+      }
     }
   ],
   "routes": [
