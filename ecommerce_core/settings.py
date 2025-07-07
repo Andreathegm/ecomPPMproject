@@ -63,7 +63,6 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'cloudinary_storage',
     'cloudinary',
-    "debug_toolbar",
     'crispy_forms',
     'crispy_bootstrap5',
     # Local apps
