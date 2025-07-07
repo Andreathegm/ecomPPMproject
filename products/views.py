@@ -3,15 +3,17 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from products.forms import ProductForm, CreateImageFormSet, EditImageFormSet, CategoryForm
 from products.models import Category, Product
-from utils.search import get_filtered_products
+from utils.search import get_filtered_products, filter_discount
 
 
 ####### category and product views (for customer) ########
@@ -52,6 +54,10 @@ class ProductListView(ListView):
     def get_queryset(self):
 
         qs = Product.objects.filter(available=True)
+
+        if self.request.GET.get('discount') in ['1', 'true', 'True', 'yes']:
+            qs = filter_discount(qs)
+
 
         # ---- Filtro per categoria ----
         category_slug = self.request.GET.get('category')
