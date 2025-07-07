@@ -60,6 +60,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third-party apps
+
+    'debug_toolbar',
+
     'whitenoise.runserver_nostatic',
     'cloudinary_storage',
     'cloudinary',
@@ -70,6 +73,7 @@ INSTALLED_APPS = [
     "orders",
     "cart",
     "users.apps.UsersConfig",
+    "mainapp.apps.MainappConfig",
 
 ]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

@@ -20,7 +20,7 @@ urlpatterns = [
     path('categories/add/', CategoryCreateView.as_view(), name='category_add'),
     path('categories/<int:pk>/edit/', CategoryUpdateView.as_view(), name='category_edit'),
 
-    path('categories/<int:pk>/delete/', CategoryDeleteView.as_view, name='category_delete'),
+    path('categories/<int:pk>/delete/', CategoryDeleteView.as_view(), name='category_delete'),
 
 ]
 

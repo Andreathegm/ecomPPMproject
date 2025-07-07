@@ -1,14 +1,12 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
+from cloudinary.models import CloudinaryField
 
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='categories/', blank=True, null=True)
+    image = CloudinaryField('category_image', blank=True, null=True, folder='ecommerce/categories_images/')
 
     class Meta:
         verbose_name_plural = "Categories"
@@ -48,10 +46,9 @@ class ProductImage(models.Model):
         related_name='images',
         help_text="product to which this image belongs"
     )
-    image = models.ImageField(
-        upload_to='products/',
-        help_text="File immagine"
-    )
+
+    image = CloudinaryField('product_image', blank=True, null=True, folder='ecommerce/product_images/')
+
     is_main = models.BooleanField(
         default=False,
         help_text="indicates if this is the main image for the product"
