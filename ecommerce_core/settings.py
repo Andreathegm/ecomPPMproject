@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party apps
 
-    'debug_toolbar',
+    # 'debug_toolbar',
 
     'whitenoise.runserver_nostatic',
     'cloudinary_storage',
@@ -90,7 +90,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
 
     # middleware about debugToolbarMiddleware
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
 
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -98,6 +98,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+
+    INTERNAL_IPS = ['127.0.0.1']
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
