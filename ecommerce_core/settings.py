@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third-party apps
-    'whitenoise.runserver_nostatic'
+    'whitenoise.runserver_nostatic',
     'cloudinary_storage',
     'cloudinary',
     "debug_toolbar",
