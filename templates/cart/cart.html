@@ -29,11 +29,11 @@
                                         <tr id="cart-item-row-{{ item.id }}">
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <a href="#">
+                                                    <a href="{% url 'product_detail' item.product.slug %}">
                                                         <img src="{{ item.product.get_main_image|default:'https://placehold.co/100x100/eee/333?text=IMG' }}" class="img-fluid rounded" style="width: 100px;" alt="{{ item.product.name }}">
                                                     </a>
                                                     <div class="ms-3">
-                                                        <h6 class="mb-0"><a href="#" class="text-dark">{{ item.product.name|default:"Product name" }}</a></h6>
+                                                        <h6 class="mb-0"><a href="{% url 'product_detail' item.product.slug %}" class="text-dark">{{ item.product.name|default:"Product name" }}</a></h6>
                                                         <small class="text-muted">{{ item.product.category.name|default:"Category" }}</small>
                                                     </div>
                                                     {% if item.product.stock == 0 %}
@@ -81,17 +81,17 @@
                                                     </button>
                                                 </div>
                                             </td>
-                                            <td id="subtotal-{{ item.id }}" class="text-end fw-bold">
+                                            <td class="text-end fw-bold">
                                                 {% if item.product.has_active_discount %}
-                                                    <span class="text-muted text-decoration-line-through">
+                                                    <span id="subtotal-{{ item.id }}" class="text-muted text-decoration-line-through">
                                                       {{ item.subtotal }}€
                                                     </span>
                                                     <br>
-                                                    <span class="text-success">
+                                                    <span id="d-subtotal-{{ item.id }}" class="text-success">
                                                       {{ item.discounted_subtotal }}€
                                                     </span>
                                                 {% else %}
-                                                    {{ item.subtotal }}€
+                                                    <span id="subtotal-{{ item.id }}">{{ item.subtotal }}€</span>
                                                 {% endif %}
                                             </td>
 
@@ -123,23 +123,23 @@
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     Subtotal
-                                    <span id="cart-total">
+                                    <span>
                                       {% if cart.discounted_total != cart.total %}
-                                          <span class="text-muted text-decoration-line-through">{{ cart.total }}€</span><br>
-                                          <span class="text-success">{{ cart.discounted_total }}€</span>
+                                          <span id="cart-total" class="text-muted text-decoration-line-through">{{ cart.total }}€</span><br>
+                                          <span id="d-cart-total" class="text-success">{{ cart.discounted_total }}€</span>
                                       {% else %}
-                                          {{ cart.total }}€
+                                          <span id="cart-total">{{ cart.total }}€</span>
                                       {% endif %}
                                     </span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     tax
-                                    <span id="cart-tax">
+                                    <span>
                                           {% if cart.discounted_tax != cart.tax %}
-                                              <span class="text-muted text-decoration-line-through">{{ cart.tax }}€</span><br>
-                                              <span class="text-success">{{ cart.discounted_tax }}€</span>
+                                              <span id="cart-tax" class="text-muted text-decoration-line-through">{{ cart.tax }}€</span><br>
+                                              <span id="d-cart-tax" class="text-success">{{ cart.discounted_tax }}€</span>
                                           {% else %}
-                                              {{ cart.tax }}€
+                                              <span id="cart-tax">{{ cart.tax }}€</span>
                                           {% endif %}
                                     </span>
                                 </li>
@@ -148,12 +148,12 @@
                                         <strong>Total</strong>
                                         <p class="mb-0"><small>(tax included)</small></p>
                                     </div>
-                                    <strong id="cart-gran-total" class="fs-5">
+                                    <strong  class="fs-5">
                                         {% if cart.discounted_grand_total != cart.grand_total %}
-                                            <span class="text-muted text-decoration-line-through">{{ cart.grand_total }}€</span><br>
-                                            <span class="text-success">{{ cart.discounted_grand_total }}€</span>
+                                            <span id="cart-gran-total" class="text-muted text-decoration-line-through">{{ cart.grand_total }}€</span><br>
+                                            <span id="d-cart-gran-total" class="text-success">{{ cart.discounted_grand_total }}€</span>
                                         {% else %}
-                                            {{ cart.grand_total }}€
+                                            <span id="cart-gran-total">{{ cart.grand_total }}€</span>
                                         {% endif %}
                                     </strong>
 

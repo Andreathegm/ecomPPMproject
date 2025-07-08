@@ -27,6 +27,7 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
         ctx['cart_items_count'] = cart.items.filter(product__stock__gt=0).count()
         ctx['shipping_cost'] = calculate_shipping_cost()
         ctx['total_amount'] = cart.grand_total + ctx['shipping_cost']
+        ctx['discounted_total'] = cart.discounted_grand_total + ctx['shipping_cost']
         return ctx
 
     def form_valid(self, form):
@@ -40,12 +41,17 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
         order = form.save(commit=False)
         order.user = self.request.user
         # Copia i totali dal carrello
-        order.subtotal      = cart.total
-        order.tax_amount    = cart.tax
-        # se hai shipping cost fisso: order.shipping_cost = cart.tax*0 ecc.
-        order.shipping_cost = self.get_context_data()['shipping_cost']  # Retrieve from context
-        # o un calcolo dinamico
-        order.total_amount  = self.get_context_data()['total_amount']
+
+        if cart.grand_total == cart.discounted_grand_total:
+            order.subtotal      = cart.total
+            order.tax_amount    = cart.tax
+            order.total_amount  = self.get_context_data()['total_amount']
+        elif cart.discounted_grand_total < cart.grand_total:
+            order.subtotal      = cart.discounted_total
+            order.tax_amount    = cart.discounted_tax
+            order.total_amount  = self.get_context_data()['discounted_total']
+
+        order.shipping_cost = self.get_context_data()['shipping_cost']
         order.save()
 
         # Crea le righe ordine

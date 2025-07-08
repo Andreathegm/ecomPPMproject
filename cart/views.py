@@ -28,7 +28,11 @@ def add_to_cart(request, product_id):
     quantity = int(request.POST.get('quantity', 1))
     cart = get_or_create_cart(request)
     product = get_object_or_404(Product, id=product_id)
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, unit_price=product.price)
+    if product.has_active_discount:
+        price = product.discounted_price
+    else:
+        price = product.price
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, unit_price=price)
 
     if not created:
         cart_item.quantity += quantity
@@ -60,6 +64,7 @@ def update_cart_item(request, item_id):
         'tax': cart_item.cart.tax,
         'grand_total': cart_item.cart.grand_total,
         ##discount managment
+        'discounted_subtotal': cart_item.discounted_subtotal,
         'discounted_total': cart_item.cart.discounted_total,
         'discounted_tax': cart_item.cart.discounted_tax,
         'discounted_grand_total': cart_item.cart.discounted_grand_total,
@@ -84,6 +89,11 @@ def remove_from_cart(request, item_id):
         'total': cart.total,
         'tax': cart.tax,
         'grand_total': cart.grand_total,
+
+        'discounted_subtotal': cart_item.discounted_subtotal,
+        'discounted_total': cart_item.cart.discounted_total,
+        'discounted_tax': cart_item.cart.discounted_tax,
+        'discounted_grand_total': cart_item.cart.discounted_grand_total,
     })
 
 # def _get_or_create_cart(request):

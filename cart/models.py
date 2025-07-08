@@ -95,6 +95,9 @@ class Cart(TimestampedModel):
 
         return (self.discounted_total + self.discounted_tax).quantize(Decimal('0.01'))
 
+    @property
+    def savings(self):
+        return self.grand_total - self.discounted_grand_total
 
 class CartItem(TimestampedModel):
 
