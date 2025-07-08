@@ -1,10 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% load static %}
+<div class="card shadow-sm sticky-top" style="top: 20px;">
+    <div class="card-header">
+        <h5 class="mb-0">Filter and order products</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="">
+            <!-- Filtro per Categoria -->
+            <h6>Category</h6>
+            <select class="form-select mb-4" name="category" id="categoryDropdown">
+                <option value="">All categories</option>
+                {% for category in category_list %}
+                    <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% empty %}
+                    <option disabled>No categories found</option>
+                {% endfor %}
+            </select>
+
+                                        <!--Discount Filter-->
+                                        <div class="form-check mb-4 mt-4">
+                                        <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="onsaleCheckbox"
+                                                name="discount"
+                                                value="1"
+                                                {% if request.GET.discount %}checked{% endif %}
+                                        >
+                                        <label class="form-check-label" for="onsaleCheckbox">
+                                            <strong>On sale </strong>
+                                        </label>
+                                    </div>
+
+
+            <!-- Filtro per Prezzo -->
+            <h6>Max price</h6>
+            <label for="priceRange" class="form-label">
+                Max price: <span id="priceValue">{% if selected_max_price %}{{ selected_max_price}}€ {% else %} - {% endif %}</span>
+            </label>
+            <input
+                    type="range"
+                    class="form-range"
+                    min="0"
+                    max="8000"
+                    id="priceRange"
+                    value="{% if selected_max_price %}{{selected_max_price}}{% else %}0{% endif %}"
+                    oninput="handlePriceInput(this)"
+            />
+            <!-- Ordinamento -->
+            <h6>Order by</h6>
+            <select class="form-select mb-4" name="order">
+                <option value="" {% if not selected_order %}selected{% endif %}>Predefined</option>
+                <option value="1" {% if selected_order == '1' %}selected{% endif %}>Price: crescent</option>
+                <option value="2" {% if selected_order == '2' %}selected{% endif %}>Price: decrescendo</option>
+                <option value="3" {% if selected_order == '3' %}selected{% endif %}>recent</option>
+            </select>
+
+            <button type="submit" class="btn btn-sm btn-outline-dark mt-2" style="position: relative">Apply filters</button>
+        </form>
+        <a href="{% if actual_section == 'product_list'%}{% url 'product_list' %}{% else %}{% url 'manage_catalog' %}{% endif %}"
+           id="clearFilters"
+           class="btn btn-sm btn-outline-secondary mt-2 d-none"
+           style="position:absolute; top:371px; left:120px;">
+            Clear filters
+        </a>
+    </div>
+</div>
+
+<script
+        src="{% static 'js/managerareas/filter_manager.js' %}">
+</script>

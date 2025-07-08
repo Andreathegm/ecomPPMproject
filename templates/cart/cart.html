@@ -43,7 +43,21 @@
                                                     {% endif %}
                                                 </div>
                                             </td>
-                                            <td class="text-center">{{ item.unit_price}}€</td>
+                                            <td class="text-center">
+                                                {% if item.product.has_active_discount %}
+                                                    <!-- prezzo originale barrato -->
+                                                    <span class="text-muted text-decoration-line-through">
+                                                      {{ item.unit_price }}€
+                                                    </span><br>
+
+                                                    <span class="text-success">
+                                                      {{ item.product.discounted_price }}€
+                                                    </span>
+                                                {% else %}
+                                                    {{ item.unit_price }}€
+                                                {% endif %}
+                                            </td>
+
                                             <td>
                                                 <!-- Form per aggiornare la quantità -->
                                                 <div class="d-flex justify-content-center">
@@ -67,7 +81,20 @@
                                                     </button>
                                                 </div>
                                             </td>
-                                            <td id="subtotal-{{ item.id }}" class="text-end fw-bold">{{ item.subtotal}}€</td>
+                                            <td id="subtotal-{{ item.id }}" class="text-end fw-bold">
+                                                {% if item.product.has_active_discount %}
+                                                    <span class="text-muted text-decoration-line-through">
+                                                      {{ item.subtotal }}€
+                                                    </span>
+                                                    <br>
+                                                    <span class="text-success">
+                                                      {{ item.discounted_subtotal }}€
+                                                    </span>
+                                                {% else %}
+                                                    {{ item.subtotal }}€
+                                                {% endif %}
+                                            </td>
+
                                             <td class="text-end">
                                                 <!-- Form per rimuovere l'articolo -->
                                                     {% csrf_token %}
@@ -96,18 +123,40 @@
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     Subtotal
-                                    <span id="cart-total">{{ cart.total}}€ </span>
+                                    <span id="cart-total">
+                                      {% if cart.discounted_total != cart.total %}
+                                          <span class="text-muted text-decoration-line-through">{{ cart.total }}€</span><br>
+                                          <span class="text-success">{{ cart.discounted_total }}€</span>
+                                      {% else %}
+                                          {{ cart.total }}€
+                                      {% endif %}
+                                    </span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     tax
-                                    <span id="cart-tax">{{ cart.tax }}€</span>
+                                    <span id="cart-tax">
+                                          {% if cart.discounted_tax != cart.tax %}
+                                              <span class="text-muted text-decoration-line-through">{{ cart.tax }}€</span><br>
+                                              <span class="text-success">{{ cart.discounted_tax }}€</span>
+                                          {% else %}
+                                              {{ cart.tax }}€
+                                          {% endif %}
+                                    </span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
                                     <div>
                                         <strong>Total</strong>
                                         <p class="mb-0"><small>(tax included)</small></p>
                                     </div>
-                                    <strong id="cart-gran-total" class="fs-5">{{ cart.grand_total}}€</strong>
+                                    <strong id="cart-gran-total" class="fs-5">
+                                        {% if cart.discounted_grand_total != cart.grand_total %}
+                                            <span class="text-muted text-decoration-line-through">{{ cart.grand_total }}€</span><br>
+                                            <span class="text-success">{{ cart.discounted_grand_total }}€</span>
+                                        {% else %}
+                                            {{ cart.grand_total }}€
+                                        {% endif %}
+                                    </strong>
+
                                 </li>
                             </ul>
 

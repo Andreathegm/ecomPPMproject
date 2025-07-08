@@ -59,6 +59,10 @@ def update_cart_item(request, item_id):
         'total': cart_item.cart.total,
         'tax': cart_item.cart.tax,
         'grand_total': cart_item.cart.grand_total,
+        ##discount managment
+        'discounted_total': cart_item.cart.discounted_total,
+        'discounted_tax': cart_item.cart.discounted_tax,
+        'discounted_grand_total': cart_item.cart.discounted_grand_total,
 
     })
 

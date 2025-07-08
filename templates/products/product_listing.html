@@ -16,89 +16,91 @@
         <div class="row">
             <!-- Colonna Sinistra: Filtri e Ordinamento -->
             <div class="col-lg-3">
-                <div class="card shadow-sm sticky-top" style="top: 20px;">
-                    <div class="card-header">
-                        <h5 class="mb-0">Filter and order products</h5>
-                    </div>
-                    <div class="card-body">
-                        <form method="get" action="">
-                            <!-- Filtro per Categoria -->
-                            <h6>Category</h6>
-                            <select class="form-select mb-4" name="category" id="categoryDropdown">
-                                <option value="">Tutte le Categorie</option>
-                                {% for category in category_list %}
-                                    <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>
-                                        {{ category.name }}
-                                    </option>
-                                {% empty %}
-                                    <option disabled>No categories found</option>
-                                {% endfor %}
-                            </select>
+                {% include "products/product_filter_section.html" with category_list=category_list selected_max_price=selected_max_price select_order=selected_order selected_category=selected_category actual_section='product_list'%}
 
-                            <!-- Filtro per Prezzo -->
-                            <h6>Max price</h6>
-
-                            <label for="priceRange" class="form-label">
-                                Max price: €<span id="priceValue">{{ selected_max_price|default:1000 }}</span>
-                            </label>
-
-                            <div class="d-flex align-items-center">
-                                <button
-                                        type="button"
-                                        class="btn btn-outline-secondary btn-sm me-2"
-                                        id="priceDecrement"
-                                >
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-
-                                <input
-                                        type="range"
-                                        class="form-range flex-grow-1"
-                                        name="max_price"
-                                        id="priceRange"
-                                        min="0"
-                                        max="1000"
-                                        value="{{ selected_max_price|default:1000 }}"
-                                >
-
-                                <button
-                                        type="button"
-                                        class="btn btn-outline-secondary btn-sm ms-2"
-                                        id="priceIncrement"
-                                >
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
-                            </div>
-
-                            <!--Discount Filter-->
-                            <div class="form-check mb-4 mt-4">
-                            <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    id="onsaleCheckbox"
-                                    name="discount"
-                                    value="1"
-                                    {% if request.GET.discount %}checked{% endif %}
-                            >
-                            <label class="form-check-label" for="onsaleCheckbox">
-                                <strong>On sale </strong>
-                            </label>
-                        </div>
-
-
-                            <!-- Ordinamento -->
-                            <h6 class ="mt-3">Order by</h6>
-                            <select class="form-select mb-4" name="order">
-                                <option value="" {% if not selected_order %}selected{% endif %}>Predefinito</option>
-                                <option value="1" {% if selected_order == '1' %}selected{% endif %}>Prezzo: crescente</option>
-                                <option value="2" {% if selected_order == '2' %}selected{% endif %}>Prezzo: decrescente</option>
-                                <option value="3" {% if selected_order == '3' %}selected{% endif %}>Più recenti</option>
-                            </select>
-
-                            <button type="submit" class="btn btn-sm btn-outline-dark mt-2">Apply filters   <i class="fa-solid fa-arrow-right"></i></button>
-                        </form>
-                    </div>
-                </div>
+                {#                <div class="card shadow-sm sticky-top" style="top: 20px;">#}
+{#                    <div class="card-header">#}
+{#                        <h5 class="mb-0">Filter and order products</h5>#}
+{#                    </div>#}
+{#                    <div class="card-body">#}
+{#                        <form method="get" action="">#}
+{#                            <!-- Filtro per Categoria -->#}
+{#                            <h6>Category</h6>#}
+{#                            <select class="form-select mb-4" name="category" id="categoryDropdown">#}
+{#                                <option value="">Tutte le Categorie</option>#}
+{#                                {% for category in category_list %}#}
+{#                                    <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>#}
+{#                                        {{ category.name }}#}
+{#                                    </option>#}
+{#                                {% empty %}#}
+{#                                    <option disabled>No categories found</option>#}
+{#                                {% endfor %}#}
+{#                            </select>#}
+{##}
+{#                            <!-- Filtro per Prezzo -->#}
+{#                            <h6>Max price</h6>#}
+{##}
+{#                            <label for="priceRange" class="form-label">#}
+{#                                Max price: €<span id="priceValue">{{ selected_max_price|default:1000 }}</span>#}
+{#                            </label>#}
+{##}
+{#                            <div class="d-flex align-items-center">#}
+{#                                <button#}
+{#                                        type="button"#}
+{#                                        class="btn btn-outline-secondary btn-sm me-2"#}
+{#                                        id="priceDecrement"#}
+{#                                >#}
+{#                                    <i class="fa-solid fa-minus"></i>#}
+{#                                </button>#}
+{##}
+{#                                <input#}
+{#                                        type="range"#}
+{#                                        class="form-range flex-grow-1"#}
+{#                                        name="max_price"#}
+{#                                        id="priceRange"#}
+{#                                        min="0"#}
+{#                                        max="1000"#}
+{#                                        value="{{ selected_max_price|default:1000 }}"#}
+{#                                >#}
+{##}
+{#                                <button#}
+{#                                        type="button"#}
+{#                                        class="btn btn-outline-secondary btn-sm ms-2"#}
+{#                                        id="priceIncrement"#}
+{#                                >#}
+{#                                    <i class="fa-solid fa-plus"></i>#}
+{#                                </button>#}
+{#                            </div>#}
+{##}
+{#                            <!--Discount Filter-->#}
+{#                            <div class="form-check mb-4 mt-4">#}
+{#                            <input#}
+{#                                    class="form-check-input"#}
+{#                                    type="checkbox"#}
+{#                                    id="onsaleCheckbox"#}
+{#                                    name="discount"#}
+{#                                    value="1"#}
+{#                                    {% if request.GET.discount %}checked{% endif %}#}
+{#                            >#}
+{#                            <label class="form-check-label" for="onsaleCheckbox">#}
+{#                                <strong>On sale </strong>#}
+{#                            </label>#}
+{#                        </div>#}
+{##}
+{##}
+{#                            <!-- Ordinamento -->#}
+{#                            <h6 class ="mt-3">Order by</h6>#}
+{#                            <select class="form-select mb-4" name="order">#}
+{#                                <option value="" {% if not selected_order %}selected{% endif %}>Predefinito</option>#}
+{#                                <option value="1" {% if selected_order == '1' %}selected{% endif %}>Prezzo: crescente</option>#}
+{#                                <option value="2" {% if selected_order == '2' %}selected{% endif %}>Prezzo: decrescente</option>#}
+{#                                <option value="3" {% if selected_order == '3' %}selected{% endif %}>Più recenti</option>#}
+{#                            </select>#}
+{##}
+{#                            <button type="submit" class="btn btn-sm btn-outline-dark mt-2">Apply filters   <i class="fa-solid fa-arrow-right"></i></button>#}
+{#                        </form>#}
+{#                    </div>#}
+{#                </div>#}
             </div>
 
             <!-- Colonna Destra: Griglia Prodotti -->
@@ -106,30 +108,32 @@
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
                     {% for product in page_obj|default:products %}
                         <div class="col">
-                            <div class="card h-100 text-center shadow-sm">
-                                <a href="#">
-                                    <img src="{{ product.get_main_image }}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 250px; width: 250px" >
-                                </a>
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">
-                                        <a href="#" class="text-decoration-none text-dark">{{ product.name|default:"product_name" }}</a>
-                                    </h5>
+                            {% include "products/product_card.html" with product=product %}
 
-                                    <p>{{ product.short_description|default:"Short description" }}</p>
-                                    <p class="card-text fw-bold text-primary fs-5 mt-auto">€{{ product.price|default:"49.99" }}</p>
-                                    {% if product.stock == 0 %}
-                                        <p class="text-danger fw-bold">Out of Stock</p>
-                                    {% else %}
-                                        <div class="d-flex justify-content-center">
-                                            <span class="badge bg-success w-30">In stock: {{ product.stock }}</span>
-                                        </div>
-                                    {% endif %}
-                                        <form method="post" action="{% url 'product_detail' product.slug %}" class="mt-2">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-primary w-100">View Details</button>
-                                        </form>
-                                </div>
-                            </div>
+                            {#                            <div class="card h-100 text-center shadow-sm">#}
+{#                                <a href="#">#}
+{#                                    <img src="{{ product.get_main_image }}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 250px; width: 250px" >#}
+{#                                </a>#}
+{#                                <div class="card-body d-flex flex-column">#}
+{#                                    <h5 class="card-title">#}
+{#                                        <a href="#" class="text-decoration-none text-dark">{{ product.name|default:"product_name" }}</a>#}
+{#                                    </h5>#}
+{##}
+{#                                    <p>{{ product.short_description|default:"Short description" }}</p>#}
+{#                                    <p class="card-text fw-bold text-primary fs-5 mt-auto">€{{ product.price|default:"49.99" }}</p>#}
+{#                                    {% if product.stock == 0 %}#}
+{#                                        <p class="text-danger fw-bold">Out of Stock</p>#}
+{#                                    {% else %}#}
+{#                                        <div class="d-flex justify-content-center">#}
+{#                                            <span class="badge bg-success w-30">In stock: {{ product.stock }}</span>#}
+{#                                        </div>#}
+{#                                    {% endif %}#}
+{#                                        <form method="post" action="{% url 'product_detail' product.slug %}" class="mt-2">#}
+{#                                            {% csrf_token %}#}
+{#                                            <button type="submit" class="btn btn-primary w-100">View Details</button>#}
+{#                                        </form>#}
+{#                                </div>#}
+{#                            </div>#}
                         </div>
                     {% empty %}
                         <div class="col-12">

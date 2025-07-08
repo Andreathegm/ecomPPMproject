@@ -1,15 +1,6 @@
 from django.db import models
-
 from products.models import Product
-
-# Create your models here.
-"""
-cart/models.py
-
-Definizione dei modelli del dominio "carrello": Cart e CartItem.
-"""
-from decimal import Decimal
-
+from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -17,16 +8,13 @@ from django.db.models import F, Sum, DecimalField
 
 
 class TimestampedModel(models.Model):
-    """
-    Modello astratto che aggiunge campi di creazione e modifica.
-    """
     created_at: models.DateTimeField = models.DateTimeField(
         auto_now_add=True,
-        help_text="Data e ora di creazione del record"
+        help_text="Date and time of record creation"
     )
     updated_at: models.DateTimeField = models.DateTimeField(
         auto_now=True,
-        help_text="Data e ora dell'ultima modifica del record"
+        help_text="Date and time of last record update"
     )
 
     class Meta:
@@ -35,13 +23,11 @@ class TimestampedModel(models.Model):
 
 
 class Cart(TimestampedModel):
-    """
-    Rappresenta un carrello associato a un utente.
-    """
+
     class Status(models.TextChoices):
-        OPEN = 'open', 'Aperto'
-        COMPLETED = 'completed', 'Completato'
-        CANCELLED = 'cancelled', 'Annullato'
+        OPEN = 'open', 'Open'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
 
     cart_id = models.CharField(max_length=250, blank=True)
 
@@ -80,63 +66,83 @@ class Cart(TimestampedModel):
 
     @property
     def tax(self) -> Decimal:
-        """
-        Calcola le tasse applicate al totale del carrello.
-        Per ora, ritorna un placeholder del 2% del totale.
-        """
         return (self.total * Decimal('0.02')).quantize(Decimal('0.01'))
 
     @property
     def grand_total(self) -> Decimal:
-        """
-        Calcola il totale comprensivo di eventuali tasse o sconti.
-        Per ora, ritorna lo stesso valore di total.
-        """
-        # Implementa qui logica per tasse/sconti se necessario
         return (self.total + self.tax)  # Placeholder per tasse/sconti
+
+    @property
+    def discounted_total(self) -> Decimal:
+        total = Decimal('0.00')
+
+        for item in self.items.select_related('product'):
+            product = item.product
+            unit_price = (
+                product.discounted_price if product.has_active_discount else item.unit_price
+            )
+            total += unit_price * item.quantity
+
+        return total.quantize(Decimal('0.01'))
+
+    @property
+    def discounted_tax(self) -> Decimal:
+
+        return (self.discounted_total * Decimal('0.02')).quantize(Decimal('0.01'))
+
+    @property
+    def discounted_grand_total(self) -> Decimal:
+
+        return (self.discounted_total + self.discounted_tax).quantize(Decimal('0.01'))
 
 
 class CartItem(TimestampedModel):
-    """
-    Rappresenta una voce di prodotto all'interno di un carrello.
-    """
+
     cart: models.ForeignKey = models.ForeignKey(
         Cart,
         on_delete=models.CASCADE,
         related_name='items',
-        help_text="Carrello di appartenenza"
+        help_text="Cart of which this item is part"
     )
     product: models.ForeignKey = models.ForeignKey(
         Product,
         on_delete=models.PROTECT,
         related_name='cart_items',
-        help_text="Prodotto aggiunto al carrello"
+        help_text="Product associated with this cart item"
     )
     quantity: models.PositiveIntegerField = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)],
-        help_text="Quantità richiesta, minimo 1"
+        help_text="minimum quantity is 1, default is 1"
     )
     unit_price: models.DecimalField = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
-        help_text="Prezzo unitario al momento dell'aggiunta"
+        help_text="unit price of the product at the time of adding to cart"
     )
 
     class Meta:
         unique_together = ('cart', 'product')
         ordering = ['-created_at']
-        verbose_name = 'Voce Carrello'
-        verbose_name_plural = 'Voci Carrello'
+        verbose_name = 'CartItem'
+        verbose_name_plural = 'CartItems'
 
     def __str__(self) -> str:
         return f"CartItem(cart_id={self.cart_id}, product={self.product}, qty={self.quantity})"
 
     @property
     def subtotal(self) -> Decimal:
-        """
-        Restituisce prezzo unitario moltiplicato per quantità.
-        """
+
         return self.unit_price * self.quantity
+
+    @property
+    def discounted_subtotal(self) -> Decimal:
+        if self.product.has_active_discount:
+            total = self.product.discounted_price * self.quantity
+        else:
+            total = self.subtotal
+        # Arrotonda sempre a 2 decimali
+        return total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
 

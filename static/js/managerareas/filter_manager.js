@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySel  = document.getElementById('categoryDropdown');
     const orderSel     = document.querySelector('select[name="order"]');
     const priceRange   = document.getElementById('priceRange');
+    const salecheckbox = document.getElementById('onsaleCheckbox');                                                id="onsaleCheckbox"
+
 
     // Se usi già handlePriceInput per aggiornare la label, lo richiameremo qui
     function onPriceInput() {
@@ -34,8 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const priceActive = priceRange.hasAttribute('name');
         const catActive   = categorySel.value !== '';
         const orderActive = orderSel.value    !== '';
+        const saleActive  = salecheckbox.checked;
 
-        if (priceActive || catActive || orderActive) {
+        if (priceActive || catActive || orderActive || saleActive) {
             clearBtn.classList.remove('d-none');
         } else {
             clearBtn.classList.add('d-none');
@@ -46,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     categorySel.addEventListener('change', updateClearBtn);
     orderSel.addEventListener('change', updateClearBtn);
     priceRange.addEventListener('input', onPriceInput);
+    salecheckbox.addEventListener('change', updateClearBtn);
 
     // init (mostra il pulsante se già ci sono filtri al primo caricamento)
     updateClearBtn();
