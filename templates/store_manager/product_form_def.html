@@ -46,19 +46,21 @@
                                                 <div class="current-image-section mb-3">
                                                     <div class="d-flex align-items-start gap-3">
                                                         <div class="flex-shrink-0">
-                                                            <img src="{{ form.instance.image.url }}" alt="Immagine attuale" class="img-thumbnail"
+                                                            <img src="{{ form.instance.image.url }}" alt="current image" class="img-thumbnail"
                                                                  style="width: 100px; height: 100px; object-fit: cover;">
                                                         </div>
                                                         <div class="flex-grow-1">
                                                             <h6 class="mb-1 text-success small">
-                                                                Immagine attuale
                                                                 {% if form.instance.is_main %}
-                                                                    <span class="badge bg-warning text-dark">PRINCIPALE</span>
+                                                                    <span class="badge bg-success ">MAIN<span>
+                                                                {% else %}
+                                                                    <span class="badge bg-warning text-dark">SECONDARY<span>
+
                                                                 {% endif %}
+
                                                             </h6>
-                                                            <p class="text-muted mb-2 small">Per sostituirla, carica una nuova immagine.</p>
-                                                            <button type="button" class="btn btn-outline-danger btn-sm remove-current-image-btn">
-                                                                <i class="fas fa-trash me-1"></i> Rimuovi
+                                                            <button type="button" class="btn btn-outline-danger btn-sm remove-current-image-btn mt-3">
+                                                                <i class="fas fa-trash me-1"></i> Remove current
                                                             </button>
                                                         </div>
                                                     </div>
@@ -75,10 +77,10 @@
                                                                  style="width: 100px; height: 100px; object-fit: cover;">
                                                         </div>
                                                         <div class="flex-grow-1">
-                                                            <h6 class="mb-1 text-info small">Nuova immagine</h6>
+                                                            <h6 class="mb-1 text-info small">New image</h6>
                                                             <p class="text-muted mb-2 small file-info"></p>
                                                             <button type="button" class="btn btn-outline-danger btn-sm remove-preview-btn">
-                                                                <i class="fas fa-trash me-1"></i> Annulla
+                                                                <i class="fas fa-trash me-1"></i> Remove
                                                             </button>
                                                         </div>
                                                     </div>
@@ -87,9 +89,9 @@
                                                 <div class="drop-zone-wrapper">
                                                     <div class="drop-zone text-center p-3 border-2 border-dashed rounded text-muted">
                                                         <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
-                                                        <p class="mb-1">Trascina qui o</p>
+                                                        <p class="mb-1">Drag here or</p>
                                                         <button type="button" class="btn btn-sm btn-outline-primary select-file-btn">
-                                                            <i class="fas fa-folder-open me-1"></i> Scegli file
+                                                            <i class="fas fa-folder-open me-1"></i> choose file
                                                         </button>
                                                     </div>
                                                     <div class="form-text text-center mt-2 image-format-info">
@@ -106,7 +108,7 @@
 
                                             {% if form.instance.pk %}
                                                 <div class="mt-2">
-                                                    <small class="text-muted">Immagine ID: {{ form.instance.pk }}</small>
+                                                    <small class="text-muted">Image ID: {{ form.instance.pk }}</small>
                                                 </div>
                                             {% endif %}
                                         </div>
@@ -148,9 +150,9 @@
                                                 <div class="drop-zone-wrapper">
                                                     <div class="drop-zone text-center p-3 border-2 border-dashed rounded text-muted">
                                                         <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
-                                                        <p class="mb-1">Trascina qui o</p>
+                                                        <p class="mb-1">Drag here or</p>
                                                         <button type="button" class="btn btn-sm btn-outline-primary select-file-btn">
-                                                            <i class="fas fa-folder-open me-1"></i> Scegli file
+                                                            <i class="fas fa-folder-open me-1"></i> choose file
                                                         </button>
                                                     </div>
                                                     <div class="form-text text-center mt-2 image-format-info">
@@ -174,10 +176,10 @@
                     <div class="d-flex gap-2 pt-4 mt-3 border-top">
                         <button type="submit" form="product-form" class="btn btn-primary flex-fill">
                             <i class="fas fa-save me-1"></i>
-                            {% if is_edit %}Salva Modifiche{% else %}Crea Prodotto{% endif %}
+                            {% if is_edit %}Save Changes{% else %}Create Product{% endif %}
                         </button>
-                        <a href="{% url 'manage_catalog' %}" class="btn btn-outline-secondary flex-fill">
-                            <i class="fas fa-times me-1"></i> Annulla
+                        <a href="{% url 'add_product' %}" class="btn btn-outline-secondary flex-fill">
+                            <i class="fas fa-times me-1"></i> Cancel
                         </a>
                     </div>
                 </div>
@@ -265,7 +267,7 @@
                 if (removeCurrentBtn) {
                     removeCurrentBtn.addEventListener('click', function(e) {
                         e.preventDefault();
-                        if (confirm('Sei sicuro di voler rimuovere l\'immagine attuale?')) {
+                        if (confirm('Are your sure you want to remove this image?')) {
                             toggleDelete(true);
                             currentImageSection.style.display = 'none';
                             uploadControls.classList.remove('d-none');

@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load static %}
+{% load utility_dict %}
 
-{% block title %}Storico Ordini - ShopEasy{% endblock title %}
+{% block title %}Order History  - ShopFrontier{% endblock title %}
 
 {% block content %}
     <div class="container my-5">
         <div class="row">
             <div class="col-12">
-                <h1 class="mb-4">I Miei Ordini</h1>
+                <h1 class="mb-4">Order History</h1>
 
                 {% if orders %}
                     <div class="accordion" id="orderHistoryAccordion">
@@ -16,9 +17,9 @@
                                 <h2 class="accordion-header" id="heading-{{ order.id }}">
                                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ order.id }}" aria-expanded="false" aria-controls="collapse-{{ order.id }}">
                                         <div class="w-100 d-flex justify-content-between align-items-center pe-3">
-                                            <span><strong>Ordine #{{ order.id }}</strong></span>
+                                            <span><strong>Order #{{ forloop.revcounter }}</strong></span>
                                             <span class="d-none d-md-block text-muted">{{ order.created_at|date:"d M Y" }}</span>
-                                            <span class="badge bg-success">{{ order.status|default:"Completato" }}</span>
+                                            <span class="badge bg-success">{{ order.status|default:"Completed" }}</span>
                                             <span><strong>€{{ order.total_amount }}</strong></span>
                                         </div>
                                     </button>
@@ -30,12 +31,85 @@
                                             {% for item in order.order_items.all %}
                                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                                     <div class="d-flex align-items-center">
-                                                        <img src="{{ item.product.get_main_image|default:'https://via.placeholder.com/50' }}" alt="{{ item.product.name }}" class="img-thumbnail me-3" style="width: 50px; height: 50px; object-fit: cover;">
-                                                        {{ item.product.name }} (x{{ item.quantity }})
+                                                        <img src="{{ item.product.get_main_image|default:'https://via.placeholder.com/50' }}" alt="{{ item.product_name }}" class="img-thumbnail me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                        {{ item.product_name }} (x{{ item.quantity }})
                                                     </div>
                                                     <span class="text-muted">€{{ item.price }}</span>
                                                 </li>
+                                                {% if item.product.id %}
+                                                <li class="list-group-item mt-3">
+                                                    <div class="review-section">
+
+
+                                                        {% with user_review=reviews|get_item:item.product.id %}
+                                                            {% if user_review %}
+                                                                <!-- Existing Review (Read-only) -->
+                                                                <div id="review-display-{{ item.product.id }}" class="review-display mb-3">
+                                                                    <div class="mb-2">
+                                                                        {% for i in "12345" %}
+                                                                            {% if forloop.counter <= user_review.rating %}
+                                                                                <i class="fa-solid fa-star text-warning"></i>
+                                                                            {% else %}
+                                                                                <i class="fa-regular fa-star text-muted"></i>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </div>
+                                                                    <p class="mb-2">{{ user_review.review_text|truncatewords:50 }}</p>
+                                                                    <button class="btn btn-sm btn-outline-primary"
+                                                                            onclick="toggleReviewForm({{ item.product.id }}, true, {{ user_review.rating }}, '{{ user_review.review_text|escapejs }}')">
+                                                                        <i class="fas fa-edit"></i> Edit Review
+                                                                    </button>
+                                                                </div>
+                                                            {% else %}
+                                                                <!-- No Review Yet -->
+                                                                <button class="btn btn-sm btn-primary"
+                                                                        onclick="toggleReviewForm({{ item.product.id }}, false, 0, '')">
+                                                                    <i class="fas fa-star"></i> Leave Review
+                                                                </button>
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    </div>
+
+                                                    <!-- Review Form (Initially Hidden) -->
+                                                    <div id="review-form-{{ item.product.id }}" class="review-form mt-3" style="display: none;">
+                                                        <form method="post" action="{% url 'create_review' %}">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="product_id" value="{{ item.product.id }}">
+                                                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                                                            <input type="hidden" name="rating" id="rating-{{ item.product.id }}" value="0">
+
+                                                            <div class="mb-3">
+                                                                <label>Rating:</label>
+                                                                <div class="review-stars" data-product-id="{{ item.product.id }}" data-rating="0">
+                                                                    {% for i in "12345" %}
+                                                                        <span class="star" data-value="{{ forloop.counter }}">
+                                                                        <i class="fa-regular fa-star"></i>
+                                                                    </span>
+                                                                    {% endfor %}
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <textarea name="review_text" id="review-text-{{item.product.id}}" class="form-control" placeholder="Share your experience..." rows="4" required></textarea>
+                                                            </div>
+
+                                                            <div class="d-flex gap-2">
+                                                                <button type="submit" class="btn btn-success">Submit Review</button>
+                                                                <button type="button" class="btn btn-secondary" onclick="toggleReviewForm({{item.product.id}}, false, 0, '')">Cancel</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </li>
+                                                {% endif %}
                                             {% endfor %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                tax
+                                                <span class="text-muted">€{{ order.tax_amount }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                shipping fee
+                                                <span class="text-muted">€{{ order.shipping_cost }}</span>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -45,10 +119,10 @@
                 {% else %}
                     <div class="text-center p-5 card shadow-sm">
                         <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                        <h3>Nessun ordine trovato</h3>
-                        <p class="text-muted">Non hai ancora effettuato nessun acquisto. Inizia a esplorare il nostro catalogo!</p>
+                        <h3>No order found</h3>
+                        <p class="text-muted">You didn't make any purchase Explore our catalog!</p>
                         <div class="mt-3">
-                            <a href="{% url 'products:list' %}" class="btn btn-primary">Inizia a fare acquisti</a>
+                            <a href="{% url 'product_list' %}" class="btn btn-primary">Start Shopping</a>
                         </div>
                     </div>
                 {% endif %}
@@ -56,3 +130,8 @@
         </div>
     </div>
 {% endblock content %}
+
+{% block footer_js %}
+    <script src="{% static 'js/review_star.js' %}"></script>
+{% endblock footer_js %}
+

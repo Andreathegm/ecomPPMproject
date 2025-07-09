@@ -58,7 +58,6 @@
                                 <p class="mb-1"><strong>Address:</strong> {{ order.shipping_address }}, {{ order.shipping_city }} ({{ order.shipping_postal_code }})</p>
                                 <p class="mb-3"><strong>Phone number:</strong> {{ order.shipping_phone }}</p>
 
-                                <!-- Form per aggiornare stato -->
                                 <form method="post" action="{% url 'order_update' order.id %}" class="d-inline-block me-3">
                                     {% csrf_token %}
                                     <div class="input-group">

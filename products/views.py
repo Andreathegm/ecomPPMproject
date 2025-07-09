@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
@@ -9,10 +10,12 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
+from django.views.decorators.http import require_POST
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
+from orders.models import Order
 from products.forms import ProductForm, CreateImageFormSet, EditImageFormSet, CategoryForm
-from products.models import Category, Product
+from products.models import Category, Product, Review
 from utils.search import get_filtered_products, filter_discount
 
 
@@ -233,24 +236,24 @@ def modify_product(request, product_id):
             try:
                 with transaction.atomic():
 
-                    # 1) Salva o aggiorna il prodotto
+                    # 1) Save or update the Product
                     updated_product = form.save()
 
-                    main_assigned = False  # flag per tenere traccia
+                    main_assigned = False  # flag to check if a main image is assigned
 
-                    # 2) Gestione di ogni sotto-form immagine
+                    # 2) Manage every image in the formset
                     for image_form in formset:
                         cd = image_form.cleaned_data
                         instance = image_form.instance
 
-                        # A) Cancellazione
+                        # A) Cancellation
                         if cd.get('DELETE', False) and instance.pk:
                             if instance.image:
                                 instance.image.delete(save=False)
                             instance.delete()
                             continue
 
-                        # B) Nuovo upload o modifica
+                        # B) new upload or modify
                         if cd.get('image') or instance.pk:
                             pi = image_form.save(commit=False)
                             pi.product = updated_product
@@ -326,7 +329,7 @@ def delete_product(request, product_id):
         product_name = product.name
         try:
             product.delete()
-            messages.success(request, f'Prodotto "{product_name}" eliminato con successo!')
+            messages.success(request, f'Product "{product_name}" eliminated_successfully!')
         except Exception as e:
             messages.error(request, f'Errore durante l\'eliminazione del prodotto: {str(e)}')
 
@@ -370,3 +373,67 @@ class CategoryDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
         category = self.get_object()
         messages.success(request, f'Category "{category.name}" eliminated successfully.')
         return super().delete(request, *args, **kwargs)
+
+####PRODUCT REVIEWS VIEWS####
+
+
+@login_required
+@require_POST
+def create_review(request):
+    product_id = request.POST.get('product_id')
+    order_id = request.POST.get('order_id')
+    rating = request.POST.get('rating')
+    review_text = request.POST.get('review_text')
+
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+
+        # Verifica che l'ordine sia stato consegnato
+        if order.status != 'delivered':
+            messages.error(request, "You can only review products from delivered orders.")
+            return redirect('order_history')
+
+        # Verifica che il prodotto sia nell'ordine
+        if not order.order_items.filter(product=product).exists():
+            messages.error(request, "You can only review products you have purchased.")
+            return redirect('order_history')
+
+        # Crea o aggiorna la recensione
+        review, created = Review.objects.update_or_create(
+            product=product,
+            user=request.user,
+            defaults={
+                'order': order,
+                'rating': int(rating),
+                'review_text': review_text
+            }
+        )
+
+        # Valida il modello
+        review.full_clean()
+
+        if created:
+            messages.success(request, "Review submitted successfully!")
+        else:
+            messages.success(request, "Review updated successfully!")
+
+    except ValidationError as e:
+        messages.error(request, str(e))
+    except ValueError:
+        messages.error(request, "Invalid rating value.")
+    except Exception as e:
+        messages.error(request, "An error occurred while saving your review.")
+
+    return redirect('order_history')
+
+
+@login_required
+def delete_review(request, review_id):
+    review = get_object_or_404(Review, id=review_id, user=request.user)
+
+    if request.method == 'POST':
+        review.delete()
+        messages.success(request, "Review deleted successfully!")
+
+    return redirect('order_history')

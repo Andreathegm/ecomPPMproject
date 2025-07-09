@@ -46,12 +46,6 @@
                         </strong>
                     </li>
 
-                    <!-- Shipping -->
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Shipping cost</span>
-                        <strong>{{ shipping_cost }}€</strong>
-                    </li>
-
                     <!-- Total -->
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         <span><strong>Total</strong></span>
@@ -70,6 +64,19 @@
                                 </small>
                             </div>
                         {% endif %}
+                    </li>
+                    <!-- Shipping -->
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Shipping cost</span>
+                        <strong>{{ shipping_cost }}€</strong>
+                    </li>
+
+                    <!-- Shipping -->
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><strong>Grand Total</strong></span>
+                        <strong style="text-decoration: underline; text-decoration-color: black;">
+                            {{ discounted_total_plus_shipped }}€
+                        </strong>
                     </li>
                 </ul>
             </div>

@@ -12,8 +12,6 @@ import json
 # Create your views here.
 def cart_detail(request):
     cart = get_or_create_cart(request)
-
-    # Placeholder for cart detail logic
     context = {
         'cart': cart,
         'cart_items': CartItem.objects.filter(cart=cart),
@@ -28,11 +26,7 @@ def add_to_cart(request, product_id):
     quantity = int(request.POST.get('quantity', 1))
     cart = get_or_create_cart(request)
     product = get_object_or_404(Product, id=product_id)
-    if product.has_active_discount:
-        price = product.discounted_price
-    else:
-        price = product.price
-    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, unit_price=price)
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, unit_price=product.price)
 
     if not created:
         cart_item.quantity += quantity

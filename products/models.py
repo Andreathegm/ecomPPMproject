@@ -1,9 +1,15 @@
 from decimal import Decimal,ROUND_HALF_UP
 
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 from cloudinary.models import CloudinaryField
+
+from orders.models import OrderItem, Order
+
+User = get_user_model()
 
 
 class Category(models.Model):
@@ -24,6 +30,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
+    short_description = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
@@ -103,6 +110,30 @@ class Product(models.Model):
             'has_discount': self.has_active_discount
         }
 
+    @property
+    def mean_rating(self):
+        reviews = self.reviews.all()
+        if not reviews:
+            return Decimal('0.0')
+
+        total_rating = sum(review.rating for review in reviews)
+
+        average = Decimal(str(total_rating)) / Decimal(str(reviews.count()))
+        return average.quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+
+    def star_count(self):
+        mean_rating = self.mean_rating
+        if mean_rating == Decimal('0.0'):
+            return 0
+
+        return int(mean_rating.to_integral_value(rounding=ROUND_HALF_UP))
+
+    @property
+    def review_count(self):
+        return self.reviews.count()
+
+
+
     def __str__(self):
         return self.name
 
@@ -135,3 +166,52 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{'main pic' if self.is_main else 'secondary pic'} – {self.product.name}"
+
+
+class Review(models.Model):
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        help_text="Order from which this review originates"
+    )
+
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    review_text = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['product', 'user']
+        indexes = [
+            models.Index(fields=['product', '-created_at']),
+            models.Index(fields=['user', '-created_at']),
+        ]
+
+    def clean(self):
+        super().clean()
+        if not self.user_has_purchased_product():
+            raise ValidationError("You can only review products you have purchased.")
+
+    def user_has_purchased_product(self):
+        return OrderItem.objects.filter(
+            order__user=self.user,
+            product=self.product,
+            order__status='delivered'
+        ).exists()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name} ({self.rating}/5)"

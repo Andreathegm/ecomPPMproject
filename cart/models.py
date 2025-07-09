@@ -45,7 +45,7 @@ class Cart(TimestampedModel):
         choices=Status.choices,
         default=Status.OPEN,
         db_index=True,
-        help_text="Stato corrente del carrello"
+        help_text="current status of the cart"
     )
 
     def __str__(self) -> str:
@@ -99,6 +99,7 @@ class Cart(TimestampedModel):
     def savings(self):
         return self.grand_total - self.discounted_grand_total
 
+
 class CartItem(TimestampedModel):
 
     cart: models.ForeignKey = models.ForeignKey(
@@ -109,7 +110,7 @@ class CartItem(TimestampedModel):
     )
     product: models.ForeignKey = models.ForeignKey(
         Product,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         related_name='cart_items',
         help_text="Product associated with this cart item"
     )
@@ -145,7 +146,12 @@ class CartItem(TimestampedModel):
             total = self.product.discounted_price * self.quantity
         else:
             total = self.subtotal
-        # Arrotonda sempre a 2 decimali
         return total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    @property
+    def discounted_price(self) -> Decimal:
+        if self.product.has_active_discount:
+            return self.product.discounted_price
+        return self.unit_price
 
 

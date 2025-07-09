@@ -31,15 +31,15 @@
 
     <div class="card-body d-flex flex-column text-center">
         <h5 class="card-title text-dark">{{ product.name }}</h5>
-        <p class="card-text text-muted small">{{ product.description }}</p>
+        <p class="card-text text-muted small">{{ product.short_description }}</p>
 {#        <p class="card-text text-muted small">{{ product.description }}</p>#}
 
         <div class="mb-2">
             {% comment %} Prendo rating e review_count, con fallback {% endcomment %}
-            {% with r=product.rating|default_if_none:"3.5"|floatformat:"1"%}
+            {% with r=product.star_count|default_if_none:"3.5"|floatformat:"1"%}
                 {% with intpart=r|slice:":1" halfdigit=r|slice:"2:3" revcount=product.review_count|default_if_none:"127"%}
 
-                    {% if product.rating %}
+                    {% if product.mean_rating %}
                         {% for _ in "12345" %}
                             {% with idx=forloop.counter|stringformat:"s" %}
                                 {% if idx <= intpart %}
@@ -51,13 +51,6 @@
                                 {% endif %}
                             {% endwith %}
                         {% endfor %}
-                    {% else %}
-                        {# FALLBACK 3.5 STELLE #}
-                        <i class="fa-solid fa-star "></i>
-                        <i class="fa-solid fa-star "></i>
-                        <i class="fa-solid fa-star "></i>
-                        <i class="fa-solid fa-star-half "></i>
-                        <i class="fa-regular fa-star"></i>
                     {% endif %}
 
                     <small class="text-muted">({{ revcount }} reviews)</small>

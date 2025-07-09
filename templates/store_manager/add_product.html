@@ -11,7 +11,7 @@
                 <!-- Dettagli Prodotto -->
                 <div class="col-lg-6 mb-4">
                     <div class="card">
-                        <div class="card-header bg-primary text-white">Dettagli Prodotto</div>
+                        <div class="card-header bg-primary text-white">Product Detail</div>
                         {{ product_form|crispy }}
                     </div>
                 </div>
@@ -19,7 +19,7 @@
                 <!-- Immagini -->
                 <div class="col-lg-6 mb-4">
                     <div class="card">
-                        <div class="card-header bg-success text-white">Immagini Prodotto</div>
+                        <div class="card-header bg-success text-white">Products' Images</div>
                         <div class="card-body">
                             {{ formset.management_form }}
 
@@ -32,7 +32,7 @@
                             </div>
 
                             <button type="button" class="btn btn-outline-secondary btn-sm mt-3" id="add-image">
-                                <i class="fas fa-plus"></i> Aggiungi altra immagine
+                                <i class="fas fa-plus"></i> Add one more image
                             </button>
                         </div>
                     </div>
@@ -42,10 +42,10 @@
             <div class="text-center">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="fas fa-save"></i>
-                    {% if is_edit %}Salva Modifiche{% else %}Salva Prodotto{% endif %}
+                    {% if is_edit %}Save Changes{% else %}Save Product{% endif %}
                 </button>
-                <a href="{% url 'manage_catalog' %}" class="btn btn-outline-secondary btn-lg ms-2">
-                    <i class="fas fa-times"></i> Annulla
+                <a href="{% url 'add_product' %}" class="btn btn-outline-secondary btn-lg ms-2">
+                    <i class="fas fa-times"></i> Cancel
                 </a>
             </div>
         </form>

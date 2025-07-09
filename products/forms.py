@@ -149,7 +149,7 @@ class ProductForm(forms.ModelForm):
             'price':       forms.NumberInput(attrs={'class':'form-control','step':'0.01'}),
             'stock':       forms.NumberInput(attrs={'class':'form-control'}),
             'name':        forms.TextInput(attrs={'class':'form-control'}),
-            'slug':        forms.TextInput(attrs={'class':'form-control'}),
+            # 'slug':        forms.TextInput(attrs={'class':'form-control'}),
             'available':   forms.CheckboxInput(attrs={'class':'form-check-input'}),
             'category':    forms.Select(attrs={'class':'form-select'}),
 
