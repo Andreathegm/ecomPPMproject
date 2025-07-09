@@ -29,12 +29,14 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "email")
+        fields = ("first_name", "last_name", "username", "email")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         placeholders = {
+            'first_name': 'insert your first name',
+            'last_name': 'insert your last name',
             'username': 'pick a unique username',
             'email': 'insert your email address',
             'password1': 'pick a password',
@@ -42,10 +44,8 @@ class CustomUserCreationForm(UserCreationForm):
         }
 
         for field_name, field in self.fields.items():
-            # Aggiungi la classe Bootstrap a tutti i campi
             field.widget.attrs['class'] = 'form-control'
 
-            # Aggiungi il placeholder se è stato definito
             if field_name in placeholders:
                 field.widget.attrs['placeholder'] = placeholders[field_name]
 

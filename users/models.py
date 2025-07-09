@@ -12,14 +12,14 @@ class CustomUser(AbstractUser):
         max_length=2,
         choices=UserType.choices,
         default=UserType.CUSTOMER,
-        verbose_name=_('Tipo utente')
+        verbose_name=_('user type')
     )
 
     email = models.EmailField(_('email address'), unique=True)
-    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='Telefono')
-    address = models.TextField(blank=True, null=True, verbose_name='Indirizzo')
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='phone number')
+    address = models.TextField(blank=True, null=True, verbose_name='address')
 
-    REQUIRED_FIELDS = ['email']  # Richiesto oltre a username per creare superuser
+    REQUIRED_FIELDS = ['email']
 
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
