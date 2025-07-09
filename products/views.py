@@ -289,7 +289,6 @@ def modify_product(request, product_id):
             except Exception as e:
                 messages.error(request, f'Errore durante l\'aggiornamento del prodotto: {e}')
                 print(f"Exception in modify_product: {e}")
-                # Log più dettagliato per debug
                 import traceback
                 traceback.print_exc()
         else:
@@ -302,9 +301,9 @@ def modify_product(request, product_id):
 
             # Mostra errori all'utente
             if form.errors:
-                messages.error(request, 'Ci sono errori nel form del prodotto.')
+                messages.error(request, 'Error in product form modifying products.')
             if formset.errors:
-                messages.error(request, 'Ci sono errori nelle immagini.')
+                messages.error(request, 'Error in product form modifying images.')
 
     else:
         form = ProductForm(instance=product)
@@ -321,9 +320,7 @@ def modify_product(request, product_id):
 
 @permission_required('products.delete_product', raise_exception=True)
 def delete_product(request, product_id):
-    """
-    View per eliminare un prodotto con conferma diretta.
-    """
+
     if request.method == 'POST':
         product = get_object_or_404(Product, id=product_id)
         product_name = product.name
@@ -331,7 +328,7 @@ def delete_product(request, product_id):
             product.delete()
             messages.success(request, f'Product "{product_name}" eliminated_successfully!')
         except Exception as e:
-            messages.error(request, f'Errore durante l\'eliminazione del prodotto: {str(e)}')
+            messages.error(request, f'Error during elimination of product {str(e)}')
 
     return redirect('manage_catalog')
 

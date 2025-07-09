@@ -141,10 +141,11 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'category', 'name', 'description', 'price', 'stock', 'available',
+            'category', 'name', 'short_description', 'description', 'price', 'stock', 'available',
             'discount_percentage', 'discount_start_date', 'discount_end_date', 'is_discount_active'
         ]
         widgets = {
+            'short_description': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Short description (optional)'}),
             'description': forms.Textarea(attrs={'class':'form-control', 'rows':4}),
             'price':       forms.NumberInput(attrs={'class':'form-control','step':'0.01'}),
             'stock':       forms.NumberInput(attrs={'class':'form-control'}),
@@ -201,6 +202,9 @@ class ProductForm(forms.ModelForm):
                 Row(
                     Column('name', css_class='col-md-6 mb-3'),
                     Column('slug', css_class='col-md-6 mb-3'),
+                ),
+                Row(
+                    Column('short_description', css_class='col-12 mb-3'),
                 ),
                 Row(
                     Column('description', css_class='col-12 mb-3'),

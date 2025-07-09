@@ -99,57 +99,180 @@
             </div>
         </div>
 
-        <!-- Sezione Dettagli Aggiuntivi (Descrizione, Specifiche, Recensioni) -->
+        <!-- Section Adding details -->
         <div class="row mt-5">
             <div class="col-12">
                 <ul class="nav nav-tabs" id="productDetailsTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Descrizione</button>
+                        <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
                     </li>
+{#                    <li class="nav-item" role="presentation">#}
+{#                        <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab" aria-controls="specs" aria-selected="false">Specifiche Tecniche</button>#}
+{#                    </li>#}
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab" aria-controls="specs" aria-selected="false">Specifiche Tecniche</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Recensioni</button>
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Ratings</button>
                     </li>
                 </ul>
                 <div class="tab-content p-4 border border-top-0" id="productDetailsTabContent">
                     <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
-                        <p>{{ product.description|linebreaks|default:"Qui va la descrizione completa e dettagliata del prodotto. Può includere paragrafi multipli per spiegare i benefici, i materiali, e le modalità d'uso, offrendo al cliente tutte le informazioni necessarie per un acquisto consapevole." }}</p>
+                        <p>{{ product.description|linebreaks|default:"All infos about use and made of the product" }}</p>
                     </div>
-                    <div class="tab-pane fade" id="specs" role="tabpanel" aria-labelledby="specs-tab">
-                        <table class="table table-striped">
-                            <tbody>
-                            <tr>
-                                <th scope="row">Peso</th>
-                                <td>{{ product.weight|default:"1.2 kg" }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Dimensioni</th>
-                                <td>{{ product.dimensions|default:"25 x 15 x 10 cm" }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Materiale</th>
-                                <td>{{ product.material|default:"Acciaio Inox e Plastica ABS" }}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">Colore</th>
-                                <td>{{ product.color|default:"Nero" }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+{#                    <div class="tab-pane fade" id="specs" role="tabpanel" aria-labelledby="specs-tab">#}
+{#                        <table class="table table-striped">#}
+{#                            <tbody>#}
+{#                            <tr>#}
+{#                                <th scope="row">Peso</th>#}
+{#                                <td>{{ product.weight|default:"1.2 kg" }}</td>#}
+{#                            </tr>#}
+{#                            <tr>#}
+{#                                <th scope="row">Dimensioni</th>#}
+{#                                <td>{{ product.dimensions|default:"25 x 15 x 10 cm" }}</td>#}
+{#                            </tr>#}
+{#                            <tr>#}
+{#                                <th scope="row">Materiale</th>#}
+{#                                <td>{{ product.material|default:"Acciaio Inox e Plastica ABS" }}</td>#}
+{#                            </tr>#}
+{#                            <tr>#}
+{#                                <th scope="row">Colore</th>#}
+{#                                <td>{{ product.color|default:"Nero" }}</td>#}
+{#                            </tr>#}
+{#                            </tbody>#}
+{#                        </table>#}
+{#                    </div>#}
+
                     <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                        <p class="text-center">Qui verranno mostrate le recensioni dei clienti.</p>
-                        <!-- Esempio di recensione -->
-                        <div class="border-bottom pb-3 mb-3">
-                            <strong>Mario Rossi</strong> - <small class="text-muted">1 settimana fa</small>
-                            <div class="text-warning">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+                        {% if product.reviews.all %}
+                            <!-- Header con statistiche recensioni -->
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center mb-2">
+                                        {% with r=product.star_count|default_if_none:"3.5"|floatformat:"1" %}
+                                            {% with intpart=r|slice:":1" halfdigit=r|slice:"2:3" revcount=product.review_count|default_if_none:"127" %}
+                                                {% if product.mean_rating %}
+                                                    {% for _ in "12345" %}
+                                                        {% with idx=forloop.counter|stringformat:"s" %}
+                                                            {% if idx <= intpart %}
+                                                                <i class="fa-solid fa-star text-warning me-1"></i>
+                                                            {% elif halfdigit == "5" and idx == intpart|add:"1" %}
+                                                                <i class="fa-solid fa-star-half text-warning me-1"></i>
+                                                            {% else %}
+                                                                <i class="fa-regular fa-star text-muted me-1"></i>
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    {% endfor %}
+                                                {% endif %}
+                                                <span class="fw-bold fs-5 me-2">{{ r }}</span>
+                                                <small class="text-muted">({{ revcount }} reviews)</small>
+                                            {% endwith %}
+                                        {% endwith %}
+                                    </div>
+                                </div>
                             </div>
-                            <p>Ottimo prodotto, esattamente come descritto. La spedizione è stata velocissima!</p>
-                        </div>
+
+                            <!-- Lista delle recensioni -->
+                            <div class="reviews-container">
+                                {% for review in product.reviews.all %}
+                                    <div class="card mb-3 border border-secondary shadow-sm">
+                                        <div class="card-body">
+                                            <!-- Header della recensione -->
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-user text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0 fw-bold">{{ review.user.username|default:review.user.username }}</h6>
+                                                        <small class="text-muted">{{ review.created_at|timesince }} fa</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Stelle della recensione -->
+                                            <div class="mb-3">
+                                                {% with rating=review.rating|default:"5" %}
+                                                    {% for _ in "12345" %}
+                                                        {% with idx=forloop.counter %}
+                                                            {% if idx <= rating %}
+                                                                <i class="fa-solid fa-star text-warning me-1"></i>
+                                                            {% else %}
+                                                                <i class="fa-regular fa-star text-muted me-1"></i>
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            </div>
+
+                                            <p class="mb-3 text-dark">{{ review.review_text|linebreaks }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Paginazione (se necessaria) -->
+                            {% if reviews.has_other_pages %}
+                                <nav aria-label="Paginazione recensioni" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        {% if reviews.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ reviews.previous_page_number }}">Precedente</a>
+                                            </li>
+                                        {% endif %}
+
+                                        {% for num in reviews.paginator.page_range %}
+                                            {% if reviews.number == num %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ num }}</span>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        {% if reviews.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ reviews.next_page_number }}">Successiva</a>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            {% endif %}
+
+                            <!-- Modali per le immagini (se presenti) -->
+                            {% for review in product.reviews.all %}
+                                {% for image in review.images.all %}
+                                    <div class="modal fade" id="imageModal{{ forloop.counter }}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Foto recensione</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    <img src="{{ image.image.url }}" alt="Foto recensione" class="img-fluid">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+
+                        {% else %}
+                            <!-- Stato vuoto -->
+                            <div class="text-center py-5">
+                                <i class="fas fa-star-half-alt text-muted mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="text-muted mb-3">Nessuna recensione ancora</h5>
+                                <p class="text-muted">Sii il primo a lasciare una recensione per questo prodotto!</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                                    <i class="fas fa-plus me-2"></i>Scrivi una recensione
+                                </button>
+                            </div>
+                        {% endif %}
                     </div>
+
+
                 </div>
             </div>
         </div>
