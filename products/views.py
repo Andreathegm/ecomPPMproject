@@ -16,18 +16,24 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from orders.models import Order
 from products.forms import ProductForm, CreateImageFormSet, EditImageFormSet, CategoryForm
 from products.models import Category, Product, Review
-from utils.search import get_filtered_products, filter_discount
+from utils.search import get_filtered_products, filter_discount, get_filtered_products_request
 
 
 ####### category and product views (for customer) ########
 def category_view(request, category_slug):
     category = get_object_or_404(Category, slug=category_slug)
     products = Product.objects.filter(category=category, available=True)
-    paginator = Paginator(products, 8)  # Show 10 products per page
+    ###so that i am sure this GET is from the filter form
+    if request.method == 'GET' and request.GET.get('min_rating'):
+        products = get_filtered_products_request(request, products)
+    paginator = Paginator(products, 8)
     page_number = request.GET.get('page')
     context = {
         'category': category,
         'products': paginator.get_page(page_number),
+        'min_rating': request.GET.get('min_rating', ''),
+        'selected_max_price': request.GET.get('max_price', ''),
+        'selected_order': request.GET.get('order', ''),
     }
     return render(request, 'products/category.html', context)
 

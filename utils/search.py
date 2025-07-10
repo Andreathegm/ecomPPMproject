@@ -7,7 +7,7 @@ from products.models import Product
 
 
 def get_filtered_products(self, query_set=None):
-    qs = query_set or Product.objects.all()# Include anche prodotti non disponibili
+    qs = query_set or Product.objects.all()
 
     discount_flag = self.request.GET.get('discount')
     if discount_flag in ['1', 'true', 'True', 'yes']:
@@ -46,6 +46,73 @@ def get_filtered_products(self, query_set=None):
         qs = qs.order_by('-created_at')
     else:                   # Default
         qs = qs.order_by('name')
+
+    min_rating = self.request.GET.get('min_rating')
+    if min_rating:
+        try:
+            min_rating = int(min_rating)
+            products = [
+                product for product in qs
+                if product.mean_rating is not None and product.mean_rating >= min_rating
+            ]
+            qs = products
+        except (ValueError, TypeError):
+            pass
+
+    return qs
+
+
+def get_filtered_products_request(request, query_set=None):
+    qs = query_set or Product.objects.all()
+
+    discount_flag = request.GET.get('discount')
+    if discount_flag in ['1', 'true', 'True', 'yes']:
+        qs = filter_discount(qs)
+
+    # ---- Filtro per ricerca ----
+    search_query = request.GET.get('search')
+    if search_query:
+        qs = qs.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(category__name__icontains=search_query)
+        )
+
+    # ---- Filtro per categoria ----
+    category_slug = request.GET.get('category')
+    if category_slug:
+        qs = qs.filter(category__slug=category_slug)
+
+    # ---- Filtro per prezzo massimo ----
+    max_price = request.GET.get('max_price')
+    if max_price and max_price != '0':
+        try:
+            max_price = float(max_price)
+            qs = qs.filter(price__lte=max_price)
+        except ValueError:
+            pass
+
+    order = request.GET.get('order')
+    if order == '1':        # Prezzo crescente
+        qs = qs.order_by('price')
+    elif order == '2':      # Prezzo decrescente
+        qs = qs.order_by('-price')
+    elif order == '3':      # Più recenti
+        qs = qs.order_by('-created_at')
+    else:                   # Default
+        qs = qs.order_by('name')
+
+    min_rating = request.GET.get('min_rating')
+    if min_rating:
+        try:
+            min_rating = int(min_rating)
+            products = [
+                product for product in qs
+                if product.mean_rating is not None and product.mean_rating >= min_rating
+            ]
+            qs = products
+        except (ValueError, TypeError):
+            pass
 
     return qs
 

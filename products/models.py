@@ -31,6 +31,11 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def max_price_product(self):
+        max_price = self.products.aggregate(Max('price'))['price__max']
+        return self.products.filter(price=max_price).first().price if max_price else Decimal('0.00')
+
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')

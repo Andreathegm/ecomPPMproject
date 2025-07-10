@@ -69,13 +69,13 @@
                                             name="max_price"
                                             id="priceRange"
                                             min="0"
-                                            max="{{max_price_by_category}}"
+                                            max="{{category.max_price_product}}"
                                             value="{% if selected_max_price %}{{selected_max_price}}{% else %}0{% endif %}"
                                             oninput="updatePriceValue(this)"
                                     >
                                     <div class="d-flex justify-content-between">
-                                        <small>€0</small>
-                                        <small>€{{max_price_by_category}}</small>
+                                        <small>0€</small>
+                                        <small>{{category.max_price_product}}€</small>
                                     </div>
                                 </div>
                             </div>
@@ -137,18 +137,6 @@
                             </div>
 
                             <div class="col-md-3">
-                                <h6>Category</h6>
-                                <select class="form-select mb-3" name="category">
-                                    <option value="">All categories</option>
-                                    {% for category in category_list %}
-                                        <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>
-                                            {{ category.name }}
-                                        </option>
-                                    {% empty %}
-                                        <option disabled>No categories found</option>
-                                    {% endfor %}
-                                </select>
-
                                 <div class="form-check">
                                     <input
                                             class="form-check-input"
@@ -182,7 +170,7 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-search"></i> Apply Filters
                                     </button>
-                                    <a href="{% if actual_section == 'product_list'%}{% url 'product_list' %}{% else %}{% url 'manage_catalog' %}{% endif %}"
+                                    <a href="{% if actual_section == 'product_list'%}{% url 'category' category_slug %}{% else %}{% url 'category' category.slug %}{% endif %}"
                                        class="btn btn-outline-secondary">
                                         <i class="fas fa-times"></i> Clear All
                                     </a>
