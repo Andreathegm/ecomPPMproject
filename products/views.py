@@ -21,11 +21,14 @@ from utils.search import get_filtered_products, filter_discount, get_filtered_pr
 
 ####### category and product views (for customer) ########
 def category_view(request, category_slug):
+    filtering = False
     category = get_object_or_404(Category, slug=category_slug)
     products = Product.objects.filter(category=category, available=True)
-    ###so that i am sure this GET is from the filter form
+
+    # so that I am sure this GET is from the filter form
     if request.method == 'GET' and request.GET.get('min_rating'):
         products = get_filtered_products_request(request, products)
+        filtering = True
     paginator = Paginator(products, 8)
     page_number = request.GET.get('page')
     context = {
@@ -34,6 +37,7 @@ def category_view(request, category_slug):
         'min_rating': request.GET.get('min_rating', ''),
         'selected_max_price': request.GET.get('max_price', ''),
         'selected_order': request.GET.get('order', ''),
+        'filtering': filtering
     }
     return render(request, 'products/category.html', context)
 

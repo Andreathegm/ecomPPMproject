@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Electronics - ShopEasy{% endblock title %}
+{% block title %}Electronics - ShopFrontier{% endblock title %}
 
 {% block content %}
 
@@ -170,7 +170,7 @@
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-search"></i> Apply Filters
                                     </button>
-                                    <a href="{% if actual_section == 'product_list'%}{% url 'category' category_slug %}{% else %}{% url 'category' category.slug %}{% endif %}"
+                                    <a href="{% url 'category' category.slug %}"
                                        class="btn btn-outline-secondary">
                                         <i class="fas fa-times"></i> Clear All
                                     </a>
@@ -206,19 +206,20 @@
     <section class="py-5">
         <div class="container">
             {% if products %}
-            <div class="row">
-                <div class="col-12 mb-4">
-                    <p class="text-muted">Showing {{ products.start_index }}-{{ products.end_index }} of {{ products.paginator.count }} results</p>
-                </div>
-            </div>
-            <div class="row g-4">
-                <!-- Product 1 -->
-                {% for product in products %}
-                    <div class="col-lg-3 col-md-6">
-                        {% include "products/product_card.html" with product=product %}
+                <div class="row">
+                    <div class="col-12 mb-4">
+                        <p class="text-muted">Showing {{ products.start_index }}-{{ products.end_index }} of {{ products.paginator.count }} results</p>
                     </div>
+                </div>
+                <div class="row g-4">
+                    <!-- Product 1 -->
+                    {% for product in products %}
+                        <div class="col-lg-3 col-md-6">
+                            {% include "products/product_card.html" with product=product %}
+                        </div>
                 {% endfor %}
             {% else %}
+                {% if not filtering %}
                 <div class="col-12">
                     <div class="text-center py-5">
                         <div class="mb-4">
@@ -228,7 +229,18 @@
                         <p class="text-muted mb-4">No products found in this category yet. Check back later!</p>
                         <a href="{% url 'product_list' %}" class="btn btn-primary">Browse All Products</a>
                     </div>
-                </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="fas fa-box-open text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <p class="text-muted mb-4">No products found for your searching criteria . Check back later!</p>
+                            <a href="{% url 'category' category.slug %}" class="btn btn-primary">Load all the product</a>
+                        </div>
+                    </div>
+                {% endif %}
+
             {% endif %}
             </div>
 

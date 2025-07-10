@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-    {{ product.name|default:"Pagina Prodotto" }} - ShopEasy
+    {{ product.name|default:"Pagina Prodotto" }} - ShopFrontier
 {% endblock title %}
 
 {% block content %}
@@ -243,27 +243,27 @@
             </div>
         </div>
 
-        <!-- Sezione Prodotti Correlati -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <h2 class="text-center mb-4">Potrebbe interessarti anche</h2>
-                <div class="row g-4">
+        <!-- For future implementation-->
+{#        <div class="row mt-5">#}
+{#            <div class="col-12">#}
+{#                <h2 class="text-center mb-4">Potrebbe interessarti anche</h2>#}
+{#                <div class="row g-4">#}
                     {# Esempio di loop per prodotti correlati #}
-                    {% for i in "1234" %}
-                        <div class="col-lg-3 col-md-6">
-                            <div class="card h-100 text-center shadow-sm">
-                                <img src="https://placehold.co/300x300/f8f9fa/333?text=Prodotto+{{i}}" class="card-img-top p-3" alt="Prodotto Correlato">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">Prodotto Correlato {{i}}</h5>
-                                    <p class="card-text fw-bold text-primary fs-5 mt-auto">€49.99</p>
-                                    <a href="#" class="btn btn-outline-primary w-100">Vedi Dettagli</a>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+{#                    {% for i in "1234" %}#}
+{#                        <div class="col-lg-3 col-md-6">#}
+{#                            <div class="card h-100 text-center shadow-sm">#}
+{#                                <img src="https://placehold.co/300x300/f8f9fa/333?text=Prodotto+{{i}}" class="card-img-top p-3" alt="Prodotto Correlato">#}
+{#                                <div class="card-body d-flex flex-column">#}
+{#                                    <h5 class="card-title">Prodotto Correlato {{i}}</h5>#}
+{#                                    <p class="card-text fw-bold text-primary fs-5 mt-auto">€49.99</p>#}
+{#                                    <a href="#" class="btn btn-outline-primary w-100">Vedi Dettagli</a>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
     </div>
 {% endblock content %}
 

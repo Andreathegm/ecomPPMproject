@@ -67,8 +67,8 @@
             <h6>Order by</h6>
             <select class="form-select mb-4" name="order">
                 <option value="" {% if not selected_order %}selected{% endif %}>Predefined</option>
-                <option value="1" {% if selected_order == '1' %}selected{% endif %}>Price: crescent</option>
-                <option value="2" {% if selected_order == '2' %}selected{% endif %}>Price: decrescendo</option>
+                <option value="1" {% if selected_order == '1' %}selected{% endif %}>Price: Low to High</option>
+                <option value="2" {% if selected_order == '2' %}selected{% endif %}>Price: High to Low </option>
                 <option value="3" {% if selected_order == '3' %}selected{% endif %}>recent</option>
             </select>
 
