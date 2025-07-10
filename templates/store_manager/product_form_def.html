@@ -52,12 +52,11 @@
                                                         <div class="flex-grow-1">
                                                             <h6 class="mb-1 text-success small">
                                                                 {% if form.instance.is_main %}
-                                                                    <span class="badge bg-success ">MAIN<span>
+                                                                    <span class="badge bg-success ">MAIN</span>
                                                                 {% else %}
-                                                                    <span class="badge bg-warning text-dark">SECONDARY<span>
+                                                                    <span class="badge bg-warning text-dark">SECONDARY</span>
 
                                                                 {% endif %}
-
                                                             </h6>
                                                             <button type="button" class="btn btn-outline-danger btn-sm remove-current-image-btn mt-3">
                                                                 <i class="fas fa-trash me-1"></i> Remove current
@@ -203,12 +202,10 @@
 
     <script>
             document.addEventListener('DOMContentLoaded', function() {
-            // Inizializza tutti i form già presenti nella pagina
             document.querySelectorAll('.image-form-container').forEach(container => {
                 const formPrefix = container.getAttribute('data-form-prefix');
                 console.log('Initializing form with prefix:', formPrefix);
 
-                // Elementi DOM specifici per questo form
                 const originalInput = container.querySelector(`#id_${formPrefix}-image`);
                 const uploadControls = container.querySelector('.image-upload-controls');
                 const currentImageSection = container.querySelector('.current-image-section');
@@ -289,7 +286,6 @@
                 }
             });
 
-            // Logica per il bottone "Aggiungi Immagine"
             const addFormBtn = document.getElementById('add-image-form-btn');
             const emptyFormTemplate = document.getElementById('empty-form-template');
             const totalFormsInput = document.querySelector('input[name="images-TOTAL_FORMS"]');
@@ -302,11 +298,9 @@
             tempDiv.innerHTML = newFormHtml;
             const newFormNode = tempDiv.firstElementChild;
 
-            // Inserisci il nuovo form nel DOM prima del div del bottone
             this.parentElement.before(newFormNode);
             totalFormsInput.value = currentFormCount + 1;
 
-            // === INIZIALIZZA IL NUOVO FORM (stessa logica di prima, applicata al nuovo nodo) ===
             const container = newFormNode;
             const formPrefix = container.getAttribute('data-form-prefix');
 
@@ -357,7 +351,6 @@
         }
         });
 
-            // Debug: mostra lo stato dei form prima del submit
             document.getElementById('product-form').addEventListener('submit', function(e) {
             console.log('Form submission - checking DELETE checkboxes:');
             document.querySelectorAll('input[name$="-DELETE"]').forEach(cb => {
