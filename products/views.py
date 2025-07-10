@@ -26,7 +26,7 @@ def category_view(request, category_slug):
     products = Product.objects.filter(category=category, available=True)
 
     # so that I am sure this GET is from the filter form
-    if request.method == 'GET' and request.GET.get('min_rating'):
+    if request.method == 'GET':
         products = get_filtered_products_request(request, products)
         filtering = True
     paginator = Paginator(products, 8)
