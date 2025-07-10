@@ -156,9 +156,9 @@ Visit `http://127.0.0.1:8000/` in your browser.
 1. **Homepage (`/`)** - Browse top picks and most commented products
 2. **Products (`/products/`)** - Use filters and search to find items
 3. **Product Detail** - Click any product to view details and add to cart
-4. **Shopping Cart (`/cart/`)** - Manage items and proceed to checkout
+4. **Shopping Cart (`/cart/`)** - Manage items and proceed to checkout (adding to cart is also permitted to anonymous users through session_key)
 5. **Checkout** - Complete order with shipping details
-6. **Order History (`/orders/`)** - View past orders and manage reviews on purchased products
+6. **Order History (`/orders/history`)** - View past orders and manage reviews on purchased products
 
 #### **Manager Access:**
 1. **Manger Panel/Catalog (`/manage_catalog/`)** - Login with superuser credentials
