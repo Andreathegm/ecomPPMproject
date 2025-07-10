@@ -41,18 +41,14 @@
             <div class="col-lg-6">
                 <h1 class="display-5 fw-bold">{{ product.name|default:"Product name example" }}</h1>
                 <p class="text-muted">
-                    In <a href="#">{{ product.category.name|default:"Category" }}</a>
+                    In <a href="{% url 'category' product.category.slug  %}">{{ product.category.name|default:"Category" }}</a>
                 </p>
                 <p class="fs-3 fw-bold text-primary my-3">€{{ product.price|default:"99.99" }}</p>
-                <p class="lead">{{ product.short_description|default:"Breve descrizione del prodotto che ne evidenzia le caratteristiche principali in poche frasi." }}</p>
+                <p class="lead">{{ product.short_description|default:"short description of the product" }}</p>
 
                 <hr>
 
-                <!-- Form per Aggiungere al Carrello -->
                 {% if cart_item_ids and product.id in cart_item_ids %}
-{#                    <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary btn-lg w-50 mt-4 mx-auto">#}
-{#                        <i class="fas fa-shopping-cart me-2"></i>#}
-{#                    </a>#}
                     <div class="d-flex justify-content-center">
                         <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary btn-lg w-75 mt-4">
                             <i class="fas fa-shopping-cart me-2"></i>
@@ -88,9 +84,9 @@
 
                 <hr>
 
-                <!-- Pulsanti di Condivisione Social -->
+                <!-- Future sharing buttons -->
                 <div class="mt-4">
-                    <strong>Condividi:</strong>
+                    <strong>share:</strong>
                     <a href="#" class="btn btn-outline-secondary btn-sm ms-2"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="btn btn-outline-secondary btn-sm"><i class="fab fa-twitter"></i></a>
                     <a href="#" class="btn btn-outline-secondary btn-sm"><i class="fab fa-pinterest-p"></i></a>
@@ -106,9 +102,6 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Description</button>
                     </li>
-{#                    <li class="nav-item" role="presentation">#}
-{#                        <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab" aria-controls="specs" aria-selected="false">Specifiche Tecniche</button>#}
-{#                    </li>#}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Ratings</button>
                     </li>
@@ -117,28 +110,6 @@
                     <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
                         <p>{{ product.description|linebreaks|default:"All infos about use and made of the product" }}</p>
                     </div>
-{#                    <div class="tab-pane fade" id="specs" role="tabpanel" aria-labelledby="specs-tab">#}
-{#                        <table class="table table-striped">#}
-{#                            <tbody>#}
-{#                            <tr>#}
-{#                                <th scope="row">Peso</th>#}
-{#                                <td>{{ product.weight|default:"1.2 kg" }}</td>#}
-{#                            </tr>#}
-{#                            <tr>#}
-{#                                <th scope="row">Dimensioni</th>#}
-{#                                <td>{{ product.dimensions|default:"25 x 15 x 10 cm" }}</td>#}
-{#                            </tr>#}
-{#                            <tr>#}
-{#                                <th scope="row">Materiale</th>#}
-{#                                <td>{{ product.material|default:"Acciaio Inox e Plastica ABS" }}</td>#}
-{#                            </tr>#}
-{#                            <tr>#}
-{#                                <th scope="row">Colore</th>#}
-{#                                <td>{{ product.color|default:"Nero" }}</td>#}
-{#                            </tr>#}
-{#                            </tbody>#}
-{#                        </table>#}
-{#                    </div>#}
 
                     <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
                         {% if product.reviews.all %}
@@ -169,12 +140,11 @@
                                 </div>
                             </div>
 
-                            <!-- Lista delle recensioni -->
+                            <!-- List of reviews -->
                             <div class="reviews-container">
                                 {% for review in product.reviews.all %}
                                     <div class="card mb-3 border border-secondary shadow-sm">
                                         <div class="card-body">
-                                            <!-- Header della recensione -->
                                             <div class="d-flex justify-content-between align-items-start mb-3">
                                                 <div class="d-flex align-items-center">
                                                     <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
@@ -187,7 +157,7 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Stelle della recensione -->
+                                            <!-- Stars reviews -->
                                             <div class="mb-3">
                                                 {% with rating=review.rating|default:"5" %}
                                                     {% for _ in "12345" %}
@@ -209,13 +179,12 @@
                                 {% endfor %}
                             </div>
 
-                            <!-- Paginazione (se necessaria) -->
                             {% if reviews.has_other_pages %}
                                 <nav aria-label="Paginazione recensioni" class="mt-4">
                                     <ul class="pagination justify-content-center">
                                         {% if reviews.has_previous %}
                                             <li class="page-item">
-                                                <a class="page-link" href="?page={{ reviews.previous_page_number }}">Precedente</a>
+                                                <a class="page-link" href="?page={{ reviews.previous_page_number }}">Previous</a>
                                             </li>
                                         {% endif %}
 
@@ -233,7 +202,7 @@
 
                                         {% if reviews.has_next %}
                                             <li class="page-item">
-                                                <a class="page-link" href="?page={{ reviews.next_page_number }}">Successiva</a>
+                                                <a class="page-link" href="?page={{ reviews.next_page_number }}">Next</a>
                                             </li>
                                         {% endif %}
                                     </ul>
@@ -263,11 +232,8 @@
                             <!-- Stato vuoto -->
                             <div class="text-center py-5">
                                 <i class="fas fa-star-half-alt text-muted mb-3" style="font-size: 3rem;"></i>
-                                <h5 class="text-muted mb-3">Nessuna recensione ancora</h5>
-                                <p class="text-muted">Sii il primo a lasciare una recensione per questo prodotto!</p>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal">
-                                    <i class="fas fa-plus me-2"></i>Scrivi una recensione
-                                </button>
+                                <h5 class="text-muted mb-3">No reviews yet</h5>
+
                             </div>
                         {% endif %}
                     </div>

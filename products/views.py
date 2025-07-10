@@ -117,7 +117,7 @@ class ManageCatalogView(ListView):
     model = Product
     template_name = 'store_manager/managecatolog.html'
     context_object_name = 'products'
-    paginate_by = 12
+    paginate_by = 9
 
     def get_queryset(self):
         return get_filtered_products(self)

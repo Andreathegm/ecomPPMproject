@@ -98,6 +98,7 @@
                         </a>
                     </div>
 
+
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
                         {% for category in categories %}
                             <div class="col">
@@ -132,8 +133,8 @@
                                 </div>
                             </div>
                         {% empty %}
-                            <div class="col-12">
-                                <div class="alert alert-info text-center">
+                            <div class="col-12 col-md-8 col-lg-6 offset-md-2 offset-lg-3 mt-4">
+                                <div class="alert alert-info text-center d-inline-block" style="margin-left: 130px">
                                     <i class="fas fa-info-circle"></i> No categories found.
                                 </div>
                             </div>
@@ -142,7 +143,7 @@
                 </div>
 
                 <!-- Sezione Prodotti -->
-                <div class="mb-5">
+                <div class="mb-5 mt-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3>Products</h3>
                         <a href="{% url 'add_product' %}" class="btn btn-success btn-sm">
@@ -150,7 +151,7 @@
                         </a>
                     </div>
 
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-4">
                         {% for product in page_obj|default:products %}
                             <div class="col">
                                 {% include "products/product_card.html" with product=product actual_section='manage_catalog' %}
@@ -200,12 +201,13 @@
 {#                                </div>#}
                             </div>
                         {% empty %}
-                            <div class="col-12">
-                                <div class="alert alert-info text-center">
+                            <div class="col-12 col-md-8 col-lg-6 offset-md-2 offset-lg-3 mt-4">
+                                <div class="alert alert-info text-center d-inline-block" style="margin-left: 40px">
                                     <i class="fas fa-info-circle"></i> No product found that matches search criteria.
                                 </div>
                             </div>
                         {% endfor %}
+
                     </div>
                 </div>
 
