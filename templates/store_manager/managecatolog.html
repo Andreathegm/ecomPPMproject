@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Gestione Catalogo - ShopEasy{% endblock title %}
+{% block title %}Manage Catalog - ShopFrontier{% endblock title %}
 
 {% block content %}
     <div class="container my-5">
-        <!-- Intestazione della Pagina -->
         <div class="row text-center mb-5">
             <div class="col-12">
                 <h1>Manage Catalog</h1>
@@ -13,7 +12,7 @@
             </div>
         </div>
 
-        <!-- Campo di Ricerca -->
+        <!-- Search bar -->
         <div class="row mb-4">
             <div class="col-12">
                 <form method="get" action="{% url 'manage_catalog' %}" class="d-flex justify-content-center">
@@ -28,68 +27,14 @@
         </div>
 
         <div class="row mt-5" >
-            <!-- Colonna Sinistra: Filtri e Ordinamento -->
+            <!-- Left column filters -->
             <div class="col-lg-3">
                 {% include "products/product_filter_section.html" with category_list=category_list selected_max_price=selected_max_price select_order=selected_order selected_category=selected_category %}
-{#                <div class="card shadow-sm sticky-top" style="top: 20px;">#}
-{#                    <div class="card-header">#}
-{#                        <h5 class="mb-0">Filter and order products</h5>#}
-{#                    </div>#}
-{#                    <div class="card-body">#}
-{#                        <form method="get" action="">#}
-{#                            <!-- Filtro per Categoria -->#}
-{#                            <h6>Category</h6>#}
-{#                            <select class="form-select mb-4" name="category" id="categoryDropdown">#}
-{#                                <option value="">Tutte le Categorie</option>#}
-{#                                {% for category in category_list %}#}
-{#                                    <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>#}
-{#                                        {{ category.name }}#}
-{#                                    </option>#}
-{#                                {% empty %}#}
-{#                                    <option disabled>No categories found</option>#}
-{#                                {% endfor %}#}
-{#                            </select>#}
-{##}
-{#                            <!-- Filtro per Prezzo -->#}
-{#                            <h6>Max price</h6>#}
-{#                            <label for="priceRange" class="form-label">Max price: €<span id="priceValue">{{ selected_max_price}}</span></label>#}
-{#                            <input type="range" class="form-range" name="max_price" min="0" max="1000" id="priceRange" value="{{ selected_max_price}}" oninput="document.getElementById('priceValue').textContent = this.value">#}
-{#                            <label for="priceRange" class="form-label">#}
-{#                                Max price: <span id="priceValue">{% if selected_max_price %}{{ selected_max_price}}€ {% else %} - {% endif %}</span>#}
-{#                            </label>#}
-{#                            <input#}
-{#                                    type="range"#}
-{#                                    class="form-range"#}
-{#                                    min="0"#}
-{#                                    max="8000"#}
-{#                                    id="priceRange"#}
-{#                                    value="{% if selected_max_price %}{{selected_max_price}}{% else %}0{% endif %}"#}
-{#                                    oninput="handlePriceInput(this)"#}
-{#                            />#}
-{#                            <!-- Ordinamento -->#}
-{#                            <h6>Order by</h6>#}
-{#                            <select class="form-select mb-4" name="order">#}
-{#                                <option value="" {% if not selected_order %}selected{% endif %}>Predefinito</option>#}
-{#                                <option value="1" {% if selected_order == '1' %}selected{% endif %}>Prezzo: crescente</option>#}
-{#                                <option value="2" {% if selected_order == '2' %}selected{% endif %}>Prezzo: decrescente</option>#}
-{#                                <option value="3" {% if selected_order == '3' %}selected{% endif %}>Più recenti</option>#}
-{#                            </select>#}
-{##}
-{#                            <button type="submit" class="btn btn-sm btn-outline-dark mt-2" style="position: relative">Apply filters</button>#}
-{#                        </form>#}
-{#                        <a href="{% url 'manage_catalog' %}"#}
-{#                           id="clearFilters"#}
-{#                           class="btn btn-sm btn-outline-secondary mt-2 d-none"#}
-{#                           style="position:absolute; top:323px; left:120px;">#}
-{#                            Clear filters#}
-{#                        </a>#}
-{#                    </div>#}
-{#                </div>#}
             </div>
 
-            <!-- Colonna Destra: Categorie e Prodotti -->
+            <!-- Right column Categories and products -->
             <div class="col-lg-9">
-                <!-- Sezione Categorie -->
+                <!-- Categories -->
                 <div class="mb-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3>Categories</h3>
@@ -113,7 +58,7 @@
                                         <div class="position-relative">
                                             <img src="{% if category.image %}{{ category.image.url }}{% else %}https://placehold.co/300x200/ccc/333?text=No+Image{% endif %}" class="card-img-top p-2" alt="{{ category.name }} image " style="height: 200px; object-fit: cover;">
                                         </div>
-                                        <p class="card-text small text-muted mt-3">{{ category.description|default:"Nessuna descrizione" }}</p>
+                                        <p class="card-text small text-muted mt-3">{{ category.description|default:"No description" }}</p>
 
                                         <div class="d-flex justify-content-center gap-3">
                                             <a href="{% url 'category'  category.slug %}" class="btn btn-sm btn-primary">
@@ -142,7 +87,7 @@
                     </div>
                 </div>
 
-                <!-- Sezione Prodotti -->
+                <!-- Product section -->
                 <div class="mb-5 mt-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h3>Products</h3>
@@ -155,50 +100,6 @@
                         {% for product in page_obj|default:products %}
                             <div class="col">
                                 {% include "products/product_card.html" with product=product actual_section='manage_catalog' %}
-{#                                <div class="card h-100 text-center shadow-sm position-relative">#}
-{#                                    <!-- Badge Stock Status -->#}
-{#                                    {% if product.stock <= 5 %}#}
-{#                                        <span#}
-{#                                                class="position-absolute top-0 start-100 badge rounded-pill bg-danger"#}
-{#                                                style="transform: translate(-60px, -10px);"#}
-{#                                        >#}
-{#                                        Low stock#}
-{#                                        </span>#}
-{#                                    {% elif product.stock <= 10 %}#}
-{#                                        <span class="position-absolute top-0 start-100  badge rounded-pill bg-warning"#}
-{#                                              style="transform: translate(-80px, -10px);">#}
-{#                                            Medium stock#}
-{#                                        </span>#}
-{#                                    {% endif %}#}
-{##}
-{#                                    <div class="position-relative">#}
-{#                                        <img src="{{product.get_main_image}}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">#}
-{#                                    </div>#}
-{##}
-{#                                    <div class="card-body d-flex flex-column">#}
-{#                                        <h5 class="card-title">{{ product.name|default:"Product name" }}</h5>#}
-{#                                        <p class="card-text fw-bold text-primary fs-5">{{ product.price|default:"49.99" }}€</p>#}
-{#                                        <p class="card-text small text-muted">Stock: {{ product.stock|default:"N/A" }}</p>#}
-{#                                        <p class="card-text small text-muted">Category: {{ product.category.name|default:"Not assigned" }}</p>#}
-{##}
-{#                                        <div class="mt-auto">#}
-{#                                            <div class="mt-auto justify-content-center gap-5">#}
-{#                                                <a href="{% url 'product_detail' product.slug %}" class="btn btn-sm btn-primary">#}
-{#                                                    <i class="fas fa-eye"></i> View#}
-{#                                                </a>#}
-{#                                                <a href="{% url 'modify_product' product.id %}" class="btn btn-sm btn-warning">#}
-{#                                                    <i class="fas fa-edit"></i> Edit#}
-{#                                                </a>#}
-{#                                                <form method="post" action="{% url 'delete_product' product.id %}" style="display: inline;">#}
-{#                                                    {% csrf_token %}#}
-{#                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Sei sicuro di voler eliminare questo prodotto: {{ product.name }}?')">#}
-{#                                                        <i class="fas fa-trash"></i> Delete#}
-{#                                                    </button>#}
-{#                                                </form>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    </div>#}
-{#                                </div>#}
                             </div>
                         {% empty %}
                             <div class="col-12 col-md-8 col-lg-6 offset-md-2 offset-lg-3 mt-4">
@@ -211,14 +112,14 @@
                     </div>
                 </div>
 
-                <!-- Paginazione -->
+                <!-- Pagination -->
                 {% if page_obj.has_other_pages %}
                     <nav aria-label="Page navigation" class="mt-5 d-flex justify-content-center">
                         <ul class="pagination">
                             {% if page_obj.has_previous %}
                                 <li class="page-item">
                                     <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}">
-                                        Precedente
+                                        Previous
                                     </a>
                                 </li>
                             {% else %}
