@@ -1,10 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+
+<!-- templates/accounts/profile.html -->
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="card shadow-sm w-50">
+            <div class="card-header d-flex justify-content-center" style="background-color: #196093; color: white;">
+                <h4 class="mb-0">Your Profile </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-flex justify-content-center">
+                        <button type="submit" class="btn btn-success mt-2">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

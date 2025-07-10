@@ -5,7 +5,7 @@
     </div>
     <div class="card-body">
         <form method="get" action="">
-            <!-- Filtro per Categoria -->
+            <!-- Category Filter -->
             <h6>Category</h6>
             <select class="form-select mb-4" name="category" id="categoryDropdown">
                 <option value="">All categories</option>
@@ -18,23 +18,38 @@
                 {% endfor %}
             </select>
 
-                                        <!--Discount Filter-->
-                                        <div class="form-check mb-4 mt-4">
-                                        <input
-                                                class="form-check-input"
-                                                type="checkbox"
-                                                id="onsaleCheckbox"
-                                                name="discount"
-                                                value="1"
-                                                {% if request.GET.discount %}checked{% endif %}
-                                        >
-                                        <label class="form-check-label" for="onsaleCheckbox">
-                                            <strong>On sale </strong>
-                                        </label>
-                                    </div>
+            <!--Discount Filter-->
+            <div class="form-check mb-4 mt-4">
+                <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="onsaleCheckbox"
+                        name="discount"
+                        value="1"
+                        {% if request.GET.discount %}checked{% endif %}
+                >
+                <label class="form-check-label" for="onsaleCheckbox">
+                    <strong>On sale </strong>
+                </label>
+            </div>
+
+            <!-- stars Filter -->
+            <div class="mb-3">
+                <label class="mt-3"><strong>Minimum Rating:</strong></label>
+                <!-- Hidden input to store the selected rating -->
+                <input type="hidden" name="min_rating" id="minRatingInput" value="{% if request.GET.min_rating %}{{ request.GET.min_rating }}{% endif %}">
+                <div class="review-stars mt-1" id="ratingFilter" data-rating="{% if request.GET.min_rating %}{{ request.GET.min_rating }}{% else %}0{% endif %}">
+                    {% for i in "12345" %}
+                        <span class="star" data-value="{{ forloop.counter }}" style="cursor: pointer;">
+                            <i class="fa-regular fa-star"></i>
+                        </span>
+                    {% endfor %}
+                </div>
+                <small class="text-muted">Click to filter by minimum rating</small>
+            </div>
 
 
-            <!-- Filtro per Prezzo -->
+            <!-- Price Filter -->
             <h6>Max price</h6>
             <label for="priceRange" class="form-label">
                 Max price: <span id="priceValue">{% if selected_max_price %}{{ selected_max_price}}€ {% else %} - {% endif %}</span>
@@ -43,7 +58,7 @@
                     type="range"
                     class="form-range"
                     min="0"
-                    max="8000"
+                    max="{{max_price}}"
                     id="priceRange"
                     value="{% if selected_max_price %}{{selected_max_price}}{% else %}0{% endif %}"
                     oninput="handlePriceInput(this)"
@@ -62,12 +77,13 @@
         <a href="{% if actual_section == 'product_list'%}{% url 'product_list' %}{% else %}{% url 'manage_catalog' %}{% endif %}"
            id="clearFilters"
            class="btn btn-sm btn-outline-secondary mt-2 d-none"
-           style="position:absolute; top:371px; left:120px;">
+           style="position:absolute; top:480px; left:120px;">
             Clear filters
         </a>
     </div>
 </div>
 
 <script
+
         src="{% static 'js/managerareas/filter_manager.js' %}">
 </script>

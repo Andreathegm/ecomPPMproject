@@ -88,6 +88,18 @@ class ProductListView(ListView):
         if self.request.GET.get('search'):
             qs = get_filtered_products(self, qs)
 
+        min_rating = self.request.GET.get('min_rating')
+        if min_rating:
+            try:
+                min_rating = int(min_rating)
+                products = [
+                    product for product in qs
+                    if product.mean_rating is not None and product.mean_rating >= min_rating
+                ]
+                qs = products
+            except (ValueError, TypeError):
+                pass
+
         return qs
 
     def get_context_data(self, **kwargs):
@@ -283,23 +295,21 @@ def modify_product(request, product_id):
                             first_img.is_main = True
                             first_img.save()
 
-                    messages.success(request, 'Prodotto aggiornato con successo!')
+                    messages.success(request, 'Product updated successfully!')
                     return redirect('manage_catalog')
 
             except Exception as e:
-                messages.error(request, f'Errore durante l\'aggiornamento del prodotto: {e}')
+                messages.error(request, f'Error updating the product: {e}')
                 print(f"Exception in modify_product: {e}")
                 import traceback
                 traceback.print_exc()
         else:
-            # Debug degli errori
             print("Form errors:", form.errors)
             print("Formset errors:", formset.errors)
             for i, form_errors in enumerate(formset.errors):
                 if form_errors:
                     print(f"Image form {i} errors: {form_errors}")
 
-            # Mostra errori all'utente
             if form.errors:
                 messages.error(request, 'Error in product form modifying products.')
             if formset.errors:

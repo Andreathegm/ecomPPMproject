@@ -1,9 +1,12 @@
 # users/views.py
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.contrib.auth import login
 from django.views.generic.edit import CreateView
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, ProfileForm
 
 
 class MyLoginView(LoginView):
@@ -22,4 +25,19 @@ class SignUpView(CreateView):
         login(self.request, user)
         return response
 
-# Create your views here.
+@login_required
+def profile_view(request):
+    user = request.user
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect('profile')
+        else:
+            messages.error(request, "Please correct the errors below.")
+            return render(request, 'user/profile.html', {'form': form})
+    else:
+        form = ProfileForm(instance=user)
+
+    return render(request, 'user/profile.html', {'form': form})

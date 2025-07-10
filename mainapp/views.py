@@ -8,12 +8,10 @@ from products.models import Category, Review, Product  # Assumendo che il model 
 
 
 def home(request):
-    categories = Category.objects.all()[:5]
     top_p = top_picks(request)  # Ottieni i prodotti più venduti
     top_revs = top_review(request)  # Ottieni i prodotti con le recensioni migliori
 
     context = {
-        'categories': categories,
         'top_picks': top_p,
         'top_reviews': top_revs,
     }

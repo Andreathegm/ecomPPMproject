@@ -56,7 +56,6 @@ function toggleReviewForm(productId, isEdit, rating = 0, reviewText = '') {
             reviewDisplay.style.display = 'none';
         }
 
-        // Se è modifica, popola i campi
         if (isEdit) {
             starContainer.setAttribute('data-rating', rating);
             document.getElementById(`rating-${productId}`).value = rating;
@@ -88,7 +87,6 @@ function toggleReviewForm(productId, isEdit, rating = 0, reviewText = '') {
     }
 }
 
-// Validazione form prima del submit
 document.addEventListener('submit', function(e) {
     if (e.target.closest('.review-form')) {
         const form = e.target;

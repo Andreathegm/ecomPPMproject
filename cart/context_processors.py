@@ -12,6 +12,7 @@ def cart_context(request):
         item_count = 0
 
     return {
+
         'cart_item_ids': cart_item_ids,
         'cart_item_count': item_count,
     }

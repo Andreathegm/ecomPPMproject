@@ -21,6 +21,25 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
     template_name = 'order/order_form.html'
     success_url = reverse_lazy('order_history')
 
+    def get_initial(self):
+        initial = super().get_initial()
+        user = self.request.user
+
+        initial['shipping_email'] = user.email
+
+        if hasattr(user, 'first_name'):
+            initial['shipping_name'] = user.first_name
+        if hasattr(user, 'last_name'):
+            initial['shipping_name'] += f" {user.last_name}"
+
+        if hasattr(user, 'phone'):
+            initial['shipping_phone'] = user.phone
+
+        if hasattr(user, 'address'):
+            initial['shipping_address'] = user.address
+
+        return initial
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         cart = get_or_create_cart(self.request)
@@ -44,13 +63,13 @@ class OrderCreateView(LoginRequiredMixin, CreateView):
         # Copia i totali dal carrello
 
         if cart.grand_total == cart.discounted_grand_total:
-            order.subtotal      = cart.total
-            order.tax_amount    = cart.tax
-            order.total_amount  = self.get_context_data()['total_amount']
+            order.subtotal = cart.total
+            order.tax_amount = cart.tax
+            order.total_amount = self.get_context_data()['total_amount']
         elif cart.discounted_grand_total < cart.grand_total:
-            order.subtotal      = cart.discounted_total
-            order.tax_amount    = cart.discounted_tax
-            order.total_amount  = self.get_context_data()['discounted_total_plus_shipped']
+            order.subtotal = cart.discounted_total
+            order.tax_amount = cart.discounted_tax
+            order.total_amount = self.get_context_data()['discounted_total_plus_shipped']
 
         order.shipping_cost = self.get_context_data()['shipping_cost']
         order.save()
@@ -99,7 +118,6 @@ def order_history_view(request):
 
     reviews = Review.objects.filter(product_id__in=ids).select_related('product')
     review_map = {review.product.id: review for review in reviews}
-
 
     # Crea un dizionario semplice: product_id -> review
     context = {
